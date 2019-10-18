@@ -1,0 +1,229 @@
+
+::selection {
+    color: #fff;
+    background: #359CDF;
+}
+
+::-moz-selection {
+    color: #fff;
+    background: #359CDF;
+}
+
+::-webkit-selection {
+    color: #fff;
+    background: #359CDF;
+}
+
+a:hover,
+a:focus, a.link {
+    color: #6EC8FB;
+}
+
+.search-full, .search-input {
+    background: #359CDF;
+}
+
+.search-close {
+    color: #359CDF;
+}
+
+.btn-primary, .btn-primary, .product:hover .add-fav:hover, .product:hover .add-fav.active {
+    background-color: #359CDF;
+    color: #FFFFFF;
+}
+
+.btn-primary:active, .btn-primary.active, .open .dropdown-toggle.btn-primary {
+    background: #2c88c5;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open .dropdown-toggle.btn-primary, .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+    background-color: #359CDF;
+    border-color: #359CDF;
+    color: #FFFFFF;
+}
+
+.navbar-top {
+    background: #359CDF;
+}
+
+.navbar-tshop {
+    background: #6EC8FB;
+}
+
+.site-color {
+    color: #359CDF !important;
+}
+
+.navbar-nav > li > a {
+    color: #fff;
+}
+
+.nav > li.active, .nav > li > a:hover, .nav > li > a:focus, .nav > li:hover > a {
+    background: #359CDF;
+}
+
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus, .cartMenu:hover > a.dropdown-toggle {
+    background: #359CDF;
+}
+
+.dropdown-menu {
+    border-top: solid #359CDF;
+}
+
+.search-box:hover .form-control {
+    background: #6EC8FB;
+}
+
+.search-box:hover .btn-nobg {
+    color: #6EC8FB;
+}
+
+.searchInputBox .search-btn {
+    color: #fff;
+}
+
+.mCS-dark-2 > .mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar {
+    background: rgba(149, 165, 166, 0.7) !important;
+}
+
+.action-control a:hover, .action-control a.active {
+    color: #fff;
+    background: #359CDF;
+}
+
+.product:hover, .featuredImgLook2 .inner:hover {
+    border: 1px solid #6EC8FB;
+}
+
+.subCategoryList .thumbnail:hover {
+    border: 1px solid #6EC8FB;
+}
+
+.pager2 a {
+    border: 1px solid #6EC8FB;
+}
+
+.pager2 a.selected {
+    background: #6EC8FB;
+}
+
+.btn-site, .newsLatterBox .btn {
+    background: #359CDF;
+}
+
+.btn-discover:hover, .btn-site:hover, .newsLatterBox .btn:hover {
+    background: #359CDF;
+}
+
+.full {
+    width: 100%;
+}
+
+.footer a:hover {
+    color: #6EC8FB;
+}
+
+.footer {
+    /*border-top: solid 3px #6EC8FB;*/
+}
+
+.modal-header {
+    background: #6EC8FB;
+}
+
+.form-control:focus {
+    border-color: #6EC8FB;
+}
+
+.new-product {
+    background: rgba(149, 165, 166, 0.95) !important;
+}
+
+#pager a.cycle-pager-active {
+    background: rgba(149, 165, 166, 0.5);
+}
+
+/* tree menu */
+
+.nav.tree > li.active, .nav.tree > li > a:hover, .nav.tree > li > a:focus, .nav.tree > li:hover > a {
+    background: none;
+    color: #359CDF;
+}
+
+.nav.tree .open-tree > a, .nav.tree .open-tree > a:hover, .nav.tree .open-tree > a:focus {
+    background: none;
+    font-weight: bold;
+    color: #359CDF;
+}
+
+.panel-default > .panel-heading {
+    border-top: 4px solid #6EC8FB;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus, .nav-tabs > li:hover > a {
+    background: #BFC9CA;
+}
+
+.nav-tabs {
+    border-bottom: 3px solid #BFC9CA;
+}
+
+.socialIcon a:hover {
+    background: #6EC8FB;
+}
+
+.cart-actions button, .cart-actions .wishlist {
+    background: none repeat scroll 0 0 #359CDF;
+    border: 2px solid #359CDF;
+}
+
+.cart-actions button:hover {
+    background: #fff;
+    color: #359CDF;
+    border: solid 2px #6EC8FB;
+}
+
+.sp-thumbs a:hover, .sp-thumbs a:active, .sp-current, sp-current:visited {
+    border: 2px solid #6EC8FB !important;
+}
+
+.promo-1 {
+    background: none repeat scroll 0 0 #359CDF;
+}
+
+@media (max-width: 767px) {
+    .miniCartFooter {
+        background: #359CDF !important;
+    }
+}
+
+#pager2 span.cycle-pager-active {
+}
+
+#pager2 span.cycle-pager-active {
+    background: #359CDF !important;
+}
+
+#pager2 span {
+    border: 2px solid #359CDF
+}
+
+.orderStep li.active a {
+    background: #6EC8FB;
+}
+
+.orderStep li.active a:after {
+    border-top-color: #6EC8FB !important;
+}
+
+.orderStep li a {
+    background: #2c88c5;
+}
+
+darkcoilor {
+    background: #2c88c5;
+}
+
+citecolor {
+    color: #6EC8FB !important;
+}
