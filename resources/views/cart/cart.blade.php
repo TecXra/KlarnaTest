@@ -1023,8 +1023,6 @@
                                                 <div id="netsPaymentForm" class="row"></div>
                                                 <a id="backPaymentOptions" class="btn btn-default btn-lg pull-right" style="font-size: 1.4em">
                                                 <i class="fa fa-arrow-left"></i> &nbsp; Tillbaka </a>
-
-
                                             </div>
                                         </div>
                                     </div>
@@ -1456,7 +1454,6 @@
                 withCredentials: true
             },
             success: function(data) {
-
                 if(data.klarnaForm) {
                     $('#klarnaForm').append(data.klarnaForm);
                     $('#storeOrderForm').addClass('hidden');

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2015 Klarna AB
  *
@@ -56,7 +57,7 @@ class Klarna_Checkout_Order extends Klarna_Checkout_Resource implements
      * @var string
      */
     protected $contentType
-        = "application/vnd.klarna.checkout.aggregated-order-v2+json";
+    = "application/json";
 
     /**
      * Create a new order.

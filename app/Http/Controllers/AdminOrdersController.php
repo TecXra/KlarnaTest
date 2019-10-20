@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Validator;
 class AdminOrdersController extends Controller
 {
 
-	private $connector;
+    private $connector;
     private $order = null;
     // test
     // private $eid = '7551';
@@ -65,16 +65,16 @@ class AdminOrdersController extends Controller
         $savedFromDate = $this->orderFromDate;
         $savedToDate = $this->orderToDate;
         $savedSearch = $this->orderSearch;
-    	// $orders = Order::orderBy('created_at', 'DESC')->paginate(100);
+        // $orders = Order::orderBy('created_at', 'DESC')->paginate(100);
         // $orderStatus = OrderStatus::where('id', '>', 1)->orderBy('id')->get();
         $orderStatus = OrderStatus::orderBy('id')->get();
 
-        if($request->ajax()) {
+        if ($request->ajax()) {
 
-            if($request->status) {
+            if ($request->status) {
                 $updateOrder = Order::find($request->id);
                 $updateOrder->order_status_id = $request->status;
-                $updateOrder->save();                
+                $updateOrder->save();
             }
 
             return [
@@ -82,7 +82,7 @@ class AdminOrdersController extends Controller
             ];
         }
 
-    	return view('admin.orders', compact('orders', 'orderStatus', 'savedStatus', 'savedFromDate', 'savedToDate', 'savedSearch'));
+        return view('admin.orders', compact('orders', 'orderStatus', 'savedStatus', 'savedFromDate', 'savedToDate', 'savedSearch'));
     }
 
     public function getSavedOrderList()
@@ -98,14 +98,14 @@ class AdminOrdersController extends Controller
 
     public function showOrder($id)
     {
-    	$order = Order::findOrFail($id);
+        $order = Order::findOrFail($id);
         // $orderStatus = OrderStatus::where('id', '>', 1)->orderBy('id')->get();
         $orderStatus = OrderStatus::orderBy('id')->get();
-    	// $orderInfo = Storage::get($order->klarna_reference . '.txt');
-    	// $orderInfo = json_decode($orderInfo, true);
-    	// dd( $orderInfo );
+        // $orderInfo = Storage::get($order->klarna_reference . '.txt');
+        // $orderInfo = json_decode($orderInfo, true);
+        // dd( $orderInfo );
 
-    	return view('admin/order_details', compact('order', 'orderStatus'));
+        return view('admin/order_details', compact('order', 'orderStatus'));
     }
 
     public function printOrder($id)
@@ -115,29 +115,28 @@ class AdminOrdersController extends Controller
         $order = Order::findOrFail($id);
         $carData = "";
         if (isset($order->carData)) {
-            if ( !empty($order->carData->reg_number))
+            if (!empty($order->carData->reg_number))
                 $carData .= "<li><b>Reg. nr: </b> {$order->carData->reg_number}</li>";
-            
 
-            if ( !empty($order->carData->car_model))
+
+            if (!empty($order->carData->car_model))
                 $carData .= "<li><b>Bil: </b> {$order->carData->car_model}</li>";
-            
 
-            if ( !empty($order->carData->front_tire))
+
+            if (!empty($order->carData->front_tire))
                 $carData .= "<li><b>Däck: </b> {$order->carData->front_tire}</li>";
-            
 
-            if ( !empty($order->carData->pcd))
+
+            if (!empty($order->carData->pcd))
                 $carData .= "<li><b>PCD: </b> {$order->carData->pcd}</li>";
-            
 
-            if ( !empty($order->carData->offset))
+
+            if (!empty($order->carData->offset))
                 $carData .= "<li><b>Offset: </b> {$order->carData->offset}</li>";
-            
 
-            if ( !empty($order->carData->nav))
+
+            if (!empty($order->carData->nav))
                 $carData .= "<li><b>Nav: </b> { $order->carData->nav} { $order->carData->oe_type }</li>";
-            
         }
 
         $products = "";
@@ -147,7 +146,7 @@ class AdminOrdersController extends Controller
                 <td>
                     <div class='CartDescription'>
                         <h4>{$item->product->product_name} </a></h4>
-                        <div class='price'><span>{$item->unit_price } kr</span></div>
+                        <div class='price'><span>{$item->unit_price} kr</span></div>
                     </div>
                 </td>
                 <td> x{$item->quantity}</td>
@@ -163,7 +162,7 @@ class AdminOrdersController extends Controller
 
     public function updateQuantity(Request $request)
     {
-    	$quantity = Product::find($request->product_id)->quantity;
+        $quantity = Product::find($request->product_id)->quantity;
 
         // Validation on max quantity
         $validator = Validator::make($request->all(), [
@@ -185,12 +184,12 @@ class AdminOrdersController extends Controller
 
         $order = Order::find($orderDetail->order_id);
         $order->total_price_excluding_tax = 0;
-	    $order->total_price_including_tax = 0;
-	    $order->total_tax_amount = 0;
-        foreach ( $order->orderDetails as $item) {
-	        $order->total_price_excluding_tax += $item->total_price_excluding_tax;
-	        $order->total_price_including_tax += $item->total_price_including_tax;
-	        $order->total_tax_amount += $item->total_tax_amount;
+        $order->total_price_including_tax = 0;
+        $order->total_tax_amount = 0;
+        foreach ($order->orderDetails as $item) {
+            $order->total_price_excluding_tax += $item->total_price_excluding_tax;
+            $order->total_price_including_tax += $item->total_price_including_tax;
+            $order->total_tax_amount += $item->total_tax_amount;
         }
         $order->save();
 
@@ -204,7 +203,7 @@ class AdminOrdersController extends Controller
         // $orderStatus = OrderStatus::where('id', '>', 1)->orderBy('id')->get();
         $orderStatus = OrderStatus::orderBy('id')->get();
 
-        if(($order->order_status_id == 4 || $order->order_status_id == 3) && !empty($order->svea_order_id)) {
+        if (($order->order_status_id == 4 || $order->order_status_id == 3) && !empty($order->svea_order_id)) {
             $orders = Order::orderBy('created_at', 'DESC')->paginate(100);
 
             return [
@@ -216,7 +215,7 @@ class AdminOrdersController extends Controller
         $paymentType = $order->payment_type;
         $countryCode = $order->billing_country;
 
-        if($request->status == 4) {
+        if ($request->status == 4) {
             // $myOrder = \WebPay::deliverOrder( $this->myConfig );
             // $myOrder->setCountryCode($countryCode);                         
             // $myOrder->setOrderId( $mySveaOrderId );
@@ -226,7 +225,7 @@ class AdminOrdersController extends Controller
             //     $myDeliverOrderRequest = $myOrder->deliverInvoiceOrder();
             //     $myResponse = $myDeliverOrderRequest->doRequest();
             // }
-            
+
             // if($paymentType == "Svea delbetalning" ) {
             //     $myDeliverOrderRequest = $myOrder->deliverPaymentPlanOrder();
             //     $myResponse = $myDeliverOrderRequest->doRequest();
@@ -240,7 +239,7 @@ class AdminOrdersController extends Controller
             Mail::to($order->user->email)->send(new ConfirmOrderSent($order));
         }
 
-        if($request->status == 3) {
+        if ($request->status == 3) {
             // $sveaRequest = \WebPayAdmin::cancelOrder($this->myConfig)
             //      ->setOrderId($mySveaOrderId)     // required, use SveaOrderId recieved with createOrder response
             //      // ->setTransactionId()   // optional, card or direct bank only, alias for setOrderId
@@ -263,11 +262,11 @@ class AdminOrdersController extends Controller
             // Mail::to($order->user->email)->send(new ConfirmOrderDenied($order));
         }
 
-        if($request->status == 2) {
+        if ($request->status == 2) {
             // Mail::to($order->user->email)->send(new ConfirmOrderTreated($order));
         }
 
-        
+
         $order->order_status_id = $request->status;
         $order->save();
 
@@ -347,7 +346,7 @@ class AdminOrdersController extends Controller
     //             $this->order->update($update);
     //         }
     //     }
-        
+
 
     //     $orders = Order::orderBy('created_at', 'DESC')->paginate(100);
 
@@ -357,7 +356,8 @@ class AdminOrdersController extends Controller
     // }
     // 
 
-    private function initKlarnaOrderManagement() {
+    private function initKlarnaOrderManagement()
+    {
         $k = new \Klarna();
 
         if (\App::environment('production')) {
@@ -380,7 +380,7 @@ class AdminOrdersController extends Controller
             );
         }
 
-        
+
 
         return $k;
     }
@@ -396,10 +396,10 @@ class AdminOrdersController extends Controller
             $order = Order::find($request->id);
 
             $result = $k->activate(
-                $order->klarna_reservation, 
+                $order->klarna_reservation,
                 null,    // OCR Number
                 \KlarnaFlags::RSRV_SEND_BY_EMAIL
-            );  
+            );
 
             $order->klarna_status = "Aktiverad";
             $order->klarna_risk = $result[0];
@@ -407,7 +407,7 @@ class AdminOrdersController extends Controller
             $order->save();
 
             // echo "OK: invoice number {$invNo} - risk status {$risk}\n";
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             echo "{$e->getMessage()} (#{$e->getCode()})\n";
         }
 
@@ -419,7 +419,7 @@ class AdminOrdersController extends Controller
         ];
     }
 
-        // for klarna
+    // for klarna
     public function cancelKlarna(Request $request)
     {
         $k = $this->initKlarnaOrderManagement();
@@ -433,9 +433,9 @@ class AdminOrdersController extends Controller
             $order->save();
 
             // echo "OK: invoice number {$invNo} - risk status {$risk}\n";
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             echo "{$e->getMessage()} (#{$e->getCode()})\n";
-        } 
+        }
 
         $orderStatus = OrderStatus::all();
         $orders = Order::orderBy('created_at', 'DESC')->paginate(100);
@@ -452,7 +452,7 @@ class AdminOrdersController extends Controller
         $this->orderStatus = $orderFilter['orderStatus'] ? $orderFilter['orderStatus'] : null;
         $this->orderFromDate = isset($orderFilter['orderFromDate']) ? $orderFilter['orderFromDate'] : null;
         $this->orderToDate = isset($orderFilter['orderToDate']) ? $orderFilter['orderToDate'] : null;
-        $this->orderSearch = isset($orderFilter['orderSearch']) ? $orderFilter['orderSearch'] : null;        
+        $this->orderSearch = isset($orderFilter['orderSearch']) ? $orderFilter['orderSearch'] : null;
     }
 
     public function storeSearchInCookie()
@@ -462,32 +462,32 @@ class AdminOrdersController extends Controller
         $orderFilter['orderToDate'] = $this->orderToDate;
         $orderFilter['orderSearch'] = $this->orderSearch;
         $orderFilter = json_encode($orderFilter);
-        Cookie::queue('orderFilter', $orderFilter, 60*24);
+        Cookie::queue('orderFilter', $orderFilter, 60 * 24);
     }
 
     public function filterOrders(Request $request)
     {
         // dd($request->all());
         // $orderStatus = OrderStatus::where('id', '>', 1)->orderBy('id')->get();
-        
+
         $this->filterOrder = Order::where('id', '<>', 0);
 
-        if(!empty($request->status)) {
+        if (!empty($request->status)) {
             $this->orderStatus = $request->status;
             $this->filterByStatus();
         }
 
-        if(!empty($request->fromDate)) {
+        if (!empty($request->fromDate)) {
             $this->orderFromDate = $request->fromDate;
             $this->filterByFromDate();
         }
 
-        if(!empty($request->toDate)) {
+        if (!empty($request->toDate)) {
             $this->orderToDate = $request->toDate;
             $this->filterByToDate();
         }
 
-        if(!empty($request->search)) {
+        if (!empty($request->search)) {
             $this->orderSearch = $request->search;
             $this->filterBySearch();
         }
@@ -523,12 +523,12 @@ class AdminOrdersController extends Controller
 
     public function filterBySearch()
     {
-        $this->filterOrder->where(function($query) {
+        $this->filterOrder->where(function ($query) {
             return $query
                 ->where('total_price_including_tax', 'like', "%{$this->orderSearch}%")
                 ->orWhere('id', 'like', "%{$this->orderSearch}%")
                 ->orWhere('reference', 'like', "%{$this->orderSearch}%")
-                ->orWhereHas('user', function($query) {
+                ->orWhereHas('user', function ($query) {
                     return $query
                         ->where('first_name', 'like', "%{$this->orderSearch}%")
                         ->orWhere('last_name', 'like', "%{$this->orderSearch}%")
@@ -540,7 +540,7 @@ class AdminOrdersController extends Controller
                         ->orWhere('billing_country', 'like', "%{$this->orderSearch}%")
                         ->orWhere('billing_phone', 'like', "%{$this->orderSearch}%");
                 })
-                ->orWhereHas('carData', function($query) {
+                ->orWhereHas('carData', function ($query) {
                     return $query
                         ->where('reg_number', 'like', "%{$this->orderSearch}%")
                         ->orWhere('car_model', 'like', "%{$this->orderSearch}%")
@@ -574,7 +574,7 @@ class AdminOrdersController extends Controller
         // $orderStatus = OrderStatus::where('id', '>', 1)->orderBy('id')->get();
         $orderStatus = OrderStatus::orderBy('id')->get();
         $updateOrder = Order::find($request->orderId);
-        $updateOrder->comment = $request->comment; 
+        $updateOrder->comment = $request->comment;
         $updateOrder->save();
 
         $orders = Order::orderBy('created_at', 'DESC')->paginate(100);
@@ -594,12 +594,12 @@ class AdminOrdersController extends Controller
         //     $username = 'ptest';
         //     $password = 'ptest';
         // }
-        
+
         $username = env('API_SEARCH_USER');
         $password = env('API_SEARCH_PASS');
 
         $headers[] = 'Authorization: Basic ' .
-        base64_encode($username.':'.$password);
+            base64_encode($username . ':' . $password);
         $headers[] = 'Content-Type: application/json';
 
         $host = "https://slimapi.abswheels.se/regNoSearch/$updateCarData->reg_number/";
@@ -607,13 +607,13 @@ class AdminOrdersController extends Controller
         $search = json_decode($apiResponse, true);
 
         // dd($search, $updateCarData->reg_number);
-        
-        
-        if($search['status'] == "NotOk") {
-            return back();
-        } 
 
-        $updateCarData->car_model = $search['data']['Manufacturer']. " " . $search['data']['ModelName'] . " " . $search['data']['FoundYear'];
+
+        if ($search['status'] == "NotOk") {
+            return back();
+        }
+
+        $updateCarData->car_model = $search['data']['Manufacturer'] . " " . $search['data']['ModelName'] . " " . $search['data']['FoundYear'];
         $updateCarData->front_tire = $search['data']['FoundDackFront'];
         $updateCarData->pcd = $search['data']['PCD'];
         $updateCarData->offset = $search['data']['Offset'];
@@ -645,17 +645,16 @@ class AdminOrdersController extends Controller
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        switch ($method)
-        {   
+        switch ($method) {
             case "POST":
-                if($data){
+                if ($data) {
                     curl_setopt($curl, CURLOPT_POST, 1);
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
                 }
                 break;
 
             case "PUT":
-                curl_setopt($curl,CURLOPT_PUT, 1);
+                curl_setopt($curl, CURLOPT_PUT, 1);
                 break;
 
             default:
@@ -671,4 +670,3 @@ class AdminOrdersController extends Controller
         return $result;
     }
 }
-

@@ -1,24 +1,24 @@
 @extends('layout')
 
 @section('header')
-      {{-- <link href="http://vjs.zencdn.net/5.10.4/video-js.css" rel="stylesheet"> --}}
-    <!-- Custom styles for this template -->
-    <link href="assets/css/home-v7.css" rel="stylesheet">
-    <meta name="google-site-verification" content="pABu7_ZfovT_TowhepND8nDv2xjYGoWKbFm1p-qhO2c" />
+{{-- <link href="http://vjs.zencdn.net/5.10.4/video-js.css" rel="stylesheet"> --}}
+<!-- Custom styles for this template -->
+<link href="assets/css/home-v7.css" rel="stylesheet">
+<meta name="google-site-verification" content="pABu7_ZfovT_TowhepND8nDv2xjYGoWKbFm1p-qhO2c" />
 @endsection
 
 @section('content')
 
-<?php $slider = $page->sliders()->where('is_active', 1)->orderBy('priority')->first(); ?>
+<?php $slider = $page->sliders()->where('is_active', 1)->orderBy('priority')->first();?>
 @if($slider)
-    <style>
-        .banner2 {
-            background-image: url(" {{$slider->path }}");
-        }
-    </style>
-    <div class="main-banner banner2 hidden-xs " aria-label="{{ $slider->title }}"></div>
+<style>
+    .banner2 {
+        background-image: url(" {{$slider->path }}");
+    }
+</style>
+<div class="main-banner banner2 hidden-xs " aria-label="{{ $slider->title }}"></div>
 @else
-    <div class="main-banner hidden-xs "></div>
+<div class="main-banner hidden-xs "></div>
 @endif
 
 <div class="main-banner-mobile hidden-sm hidden-md hidden-lg"></div>
@@ -38,17 +38,17 @@
             <img id="loading-image" class="center-block" src="{{ asset('images/loading.svg') }}">
         </div>
         <div class="tab-pane active" id="search-reg-mobile">
-        <form action="sok/reg/kompletta-hjul/falgar" method="POST">
-            {{ csrf_field() }}
-            @if (isset($searchData))
+            <form action="sok/reg/kompletta-hjul/falgar" method="POST">
+                {{ csrf_field() }}
+                @if (isset($searchData))
                 @include('pages.partials.search_reg_form')
-            @else
+                @else
                 <div class="inner-addon reg-search left-addon">
                     <i class="glyphicon" aria-hidden="true"><img height="70" src="assets/img/regsearch.png"></i>
                     <input id="regNrSearch" type="text" name="regnr" class="form-control" placeholder="ABC123" autocomplete="off" >
                 </div><!-- /.inner-addon -->
 
-                <div class="productFilter productFilterLook2" style="border:none">      
+                <div class="productFilter productFilterLook2" style="border:none">
                     <ul id="complete_wheels_bullets" >
                         <li class="block-title-3 "><i class="fa fa-car"></i> Kompletta hjul </li><br>
                         <li class="block-title-3 "><i class="fa fa-tag"></i> Billiga priser</li><br>
@@ -56,9 +56,9 @@
                     </ul>
                 </div>
                 <!-- productFilter -->
-            @endif
-   
-        </form>
+                @endif
+
+            </form>
         </div>
         <div class="tab-pane" id="search-model-mobile"></div>
     </div>
@@ -72,51 +72,51 @@
         <div class="col-sm-4 ">
           <div class="panel-heading"><h2>Fälgar</h2></div>
           <div class="panel-body ">
-                <div class="row row-centered">
-                    <div class="block-explore col-centered ">
-                        <div class="inner">
-                            <a class="overly hw100" href="{{ url('falgar') }}">
-                                {{-- <span class="explore-title"> Fälgar</span> --}}
-                            </a>
-                            <a href="{{ url('falgar') }}" class="img-block"> <img alt="img" src="images/site/frontpage-boxes/boxImg_12.jpg"
-                                                                class="img-responsive"></a>
+            <div class="row row-centered">
+                <div class="block-explore col-centered ">
+                    <div class="inner">
+                        <a class="overly hw100" href="{{ url('falgar') }}">
+                            {{-- <span class="explore-title"> Fälgar</span> --}}
+                        </a>
+                        <a href="{{ url('falgar') }}" class="img-block"> <img alt="img" src="images/site/frontpage-boxes/boxImg_12.jpg"
+                            class="img-responsive"></a>
                         </div>
                     </div>
                 </div>
 
-          </div>
+            </div>
         </div>
         <div class="col-sm-4  ">
           <div class="panel-heading"><h2>Däck</h2></div>
           <div class="panel-body">
               <div class="row row-centered">
-                    <div class="block-explore col-centered ">
-                        <div class="inner">
-                            <a class="overly hw100" href="{{ url('sommardack') }}">
-                                {{-- <span class="explore-title"> Däck</span> --}}
-                            </a>
-                            <a href="{{ url('sommardack') }}" class="img-block"> <img alt="img" src="images/site/frontpage-boxes/boxImg_2.jpg"
-                                                                class="img-responsive"></a>
+                <div class="block-explore col-centered ">
+                    <div class="inner">
+                        <a class="overly hw100" href="{{ url('sommardack') }}">
+                            {{-- <span class="explore-title"> Däck</span> --}}
+                        </a>
+                        <a href="{{ url('sommardack') }}" class="img-block"> <img alt="img" src="images/site/frontpage-boxes/boxImg_2.jpg"
+                            class="img-responsive"></a>
                         </div>
                     </div>
                 </div>
-          </div>
+            </div>
         </div>
         <div class="col-sm-4  ">
           <div class="panel-heading"><h2>Tillbehör</h2></div>
           <div class="panel-body">
               <div class="row row-centered">
-                    <div class="block-explore col-centered ">
-                        <div class="inner">
-                            <a class="overly hw100" href="{{ url('tillbehor') }}">
-                                {{-- <span class="explore-title"> Tillbehör</span> --}}
-                            </a>
-                            <a href="{{ url('tillbehor') }}" class="img-block"> <img alt="img" src="images/site/frontpage-boxes/boxImg_3.jpg"
-                                                                class="img-responsive"></a>
+                <div class="block-explore col-centered ">
+                    <div class="inner">
+                        <a class="overly hw100" href="{{ url('tillbehor') }}">
+                            {{-- <span class="explore-title"> Tillbehör</span> --}}
+                        </a>
+                        <a href="{{ url('tillbehor') }}" class="img-block"> <img alt="img" src="images/site/frontpage-boxes/boxImg_3.jpg"
+                            class="img-responsive"></a>
                         </div>
                     </div>
                 </div>
-          </div>
+            </div>
         </div>
     </div>
 </div>
@@ -127,14 +127,14 @@
 <div class="container">
     <div class="row">
 
-                {{-- <h1 class="block-title-3" style="font-size: 1.6em;">Kompletta hjul, bildäck och fälg hos Hjul online</h1> --}}
-                {{-- <p class="lead"> --}}
-                    {!! $page->content !!}
-                    {{-- Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. --}}<br><br>
+        {{-- <h1 class="block-title-3" style="font-size: 1.6em;">Kompletta hjul, bildäck och fälg hos Hjul online</h1> --}}
+        {{-- <p class="lead"> --}}
+            {!! $page->content !!}
+            {{-- Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. --}}<br><br>
 
-                    {{--  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. --}}
+            {{--  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. --}}
 
-                {{-- </p> --}}
+        {{-- </p> --}}
 
 
          {{--    <div class="col-sm-4">
@@ -145,10 +145,10 @@
                     Du kan ringa oss mellan 08.00 till 12.00 vardagar eller maila oss på info@hjulonline.se dygnet runt.
                 </p>
             </div> --}}
-            
+
             <!-- <div class="row animated">
                 <div class="col-lg-4 col-md-4 col-sm-6 col-sm-6">
-                    
+
                     <i class="glyphicon" aria-hidden="true"></i>
                     <span style="font-size:10em; margin:20px 30%;" class="glyphicon glyphicon-tags" aria-hidden="true"></span>
 
@@ -169,14 +169,14 @@
                         Leverans
                     </h3>
                      <h3 class="text-center">
-                        Snabb leverans till dig eller din verkstad                            
+                        Snabb leverans till dig eller din verkstad
                     </h3>
-                     
+
 
                 </div>
 
                 <div class="col-lg-4 col-md-4 col-sm-6 col-sm-6">
-                    
+
 
                     <i class="glyphicon" aria-hidden="true"></i>
                     <span style="font-size:10em; margin:20px 30%;" class="glyphicon glyphicon-certificate" aria-hidden="true"></span>
@@ -193,60 +193,60 @@
 
             </div> -->
             <!--/.row-->
-    </div>
-    <!--/.innerPage-->
-    <div style="clear:both"></div>
-</div>
-<!-- /.main-container -->
-
-
-<div class="container" style="margin-top: 100px">
-
-    <div class="width100 section-block">
-        <h3 class="block-title-3 "><span> Några av de varumärken som vi jobbar med</span> <a id="nextBrand" class="link pull-right carousel-nav"> <i
-                class="fa fa-angle-right"></i></a> <a id="prevBrand" class="link pull-right carousel-nav"> <i
-                class="fa fa-angle-left"></i> </a></h3>
-
-        <div class="row">
-            <div class="col-lg-12">
-                <ul class="no-margin brand-carousel owl-carousel owl-theme">
-                    <li><a><img src="{{ asset("images/brand/achilles.png") }}" alt="achilles"></a></li>
-                    <li><img src="{{ asset("images/brand/atlas.png") }}" alt="atlas"></li>
-                    <li><img src="{{ asset("images/brand/autogrip.png") }}" alt="autogrip"></li>
-                    <li><img src="{{ asset("images/brand/continental.png") }}" alt="continental"></li>
-                    <li><img src="{{ asset("images/brand/dunlop.png") }}" alt="dunlop"></li>
-                    <li><img src="{{ asset("images/brand/duro.png") }}" alt="duro"></li>
-                    <li><img src="{{ asset("images/brand/goodyear.png") }}" alt="goodyear"></li>
-                    <li><img src="{{ asset("images/brand/hankook.png") }}" alt="hankook"></li>
-                    <li><img src="{{ asset("images/brand/michelin.png") }}" alt="michelin"></li>
-                    <li><img src="{{ asset("images/brand/pirelli.png") }}" alt="pirelli"></li>
-                </ul>
-            </div>
         </div>
-        <!--/.row-->
+        <!--/.innerPage-->
+        <div style="clear:both"></div>
     </div>
-    <!--/.section-block-->
+    <!-- /.main-container -->
 
-</div>
-<!--main-container-->
-<br>
 
-<style>
-    .footer-top {
-        background-color: #E3E3E3; 
-        height: 65px; 
-        padding-top: 20px; 
-        padding-bottom: 15px; 
-        color: #333; 
-        border-bottom: 1px solid #ddd; 
-    }
+    <div class="container" style="margin-top: 100px">
 
-    .footer-top h3 {
-        font-weight: 400;
-        font-size: 1.5em;
-    }
+        <div class="width100 section-block">
+            <h3 class="block-title-3 "><span> Några av de varumärken som vi jobbar med</span> <a id="nextBrand" class="link pull-right carousel-nav"> <i
+                class="fa fa-angle-right"></i></a> <a id="prevBrand" class="link pull-right carousel-nav"> <i
+                    class="fa fa-angle-left"></i> </a></h3>
 
-</style>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <ul class="no-margin brand-carousel owl-carousel owl-theme">
+                                <li><a><img src="{{ asset("images/brand/achilles.png") }}" alt="achilles"></a></li>
+                                <li><img src="{{ asset("images/brand/atlas.png") }}" alt="atlas"></li>
+                                <li><img src="{{ asset("images/brand/autogrip.png") }}" alt="autogrip"></li>
+                                <li><img src="{{ asset("images/brand/continental.png") }}" alt="continental"></li>
+                                <li><img src="{{ asset("images/brand/dunlop.png") }}" alt="dunlop"></li>
+                                <li><img src="{{ asset("images/brand/duro.png") }}" alt="duro"></li>
+                                <li><img src="{{ asset("images/brand/goodyear.png") }}" alt="goodyear"></li>
+                                <li><img src="{{ asset("images/brand/hankook.png") }}" alt="hankook"></li>
+                                <li><img src="{{ asset("images/brand/michelin.png") }}" alt="michelin"></li>
+                                <li><img src="{{ asset("images/brand/pirelli.png") }}" alt="pirelli"></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!--/.row-->
+                </div>
+                <!--/.section-block-->
+
+            </div>
+            <!--main-container-->
+            <br>
+
+            <style>
+                .footer-top {
+                    background-color: #E3E3E3;
+                    height: 65px;
+                    padding-top: 20px;
+                    padding-bottom: 15px;
+                    color: #333;
+                    border-bottom: 1px solid #ddd;
+                }
+
+                .footer-top h3 {
+                    font-weight: 400;
+                    font-size: 1.5em;
+                }
+
+            </style>
 
 {{-- <div class="footer-top" >
     <div class="container">
@@ -266,13 +266,13 @@ Billiga priser</h3>
 <!-- Product Details Modal  -->
 <!-- Modal -->
 <div class="modal fade" id="productSetailsModalAjax" tabindex="-1" role="dialog"
-     aria-labelledby="productSetailsModalAjaxLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-        </div>
-        <!-- /.modal-content -->
+aria-labelledby="productSetailsModalAjaxLabel" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
     </div>
-    <!-- /.modal-dialog -->
+    <!-- /.modal-content -->
+</div>
+<!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
 <!-- End Modal -->
@@ -302,14 +302,14 @@ Billiga priser</h3>
     //     }, 9000);
     // });
 
-    // var video = videojs('my-video');  
+    // var video = videojs('my-video');
 
     // video.ready(function() {
     //     this.play();
     //     setTimeout(() => {
     //         this.pause();
     //     }, 7000);
-    // })                 
+    // })
 </script>
 
 <!-- include jqueryCycle plugin -->

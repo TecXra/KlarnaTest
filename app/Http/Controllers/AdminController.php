@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 class AdminController extends Controller
 {
 
-	private $connector;
+    private $connector;
     private $order = null;
     private $eid = '7551';
     private $sharedSecret = 'hFH4ToOoftLKno9';
@@ -32,35 +32,35 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-    	return view('admin.dashboard');
+        return view('admin.dashboard');
     }
 
     public function orders()
     {
-    	$orders = Order::all();
-    	return view('admin.orders', compact('orders'));
+        $orders = Order::all();
+        return view('admin.orders', compact('orders'));
     }
 
 
     public function users()
     {
-    	$users = User::all();
-    	return view('admin.users', compact('users'));
+        $users = User::all();
+        return view('admin.users', compact('users'));
     }
 
     public function showOrder($id)
     {
-    	$order = Order::findOrFail($id);
-    	// $orderInfo = Storage::get($order->klarna_reference . '.txt');
-    	// $orderInfo = json_decode($orderInfo, true);
-    	// dd( $orderInfo );
+        $order = Order::findOrFail($id);
+        // $orderInfo = Storage::get($order->klarna_reference . '.txt');
+        // $orderInfo = json_decode($orderInfo, true);
+        // dd( $orderInfo );
 
-    	return view('admin/order_details', compact('order'));
+        return view('admin/order_details', compact('order'));
     }
 
     public function updateQuantity(Request $request)
     {
-    	$quantity = Product::find($request->product_id)->quantity;
+        $quantity = Product::find($request->product_id)->quantity;
 
         // Validation on max quantity
         $validator = Validator::make($request->all(), [
@@ -82,12 +82,12 @@ class AdminController extends Controller
 
         $order = Order::find($orderDetail->order_id);
         $order->total_price_excluding_tax = 0;
-	    $order->total_price_including_tax = 0;
-	    $order->total_tax_amount = 0;
-        foreach ( $order->orderDetails as $item) {
-	        $order->total_price_excluding_tax += $item->total_price_excluding_tax;
-	        $order->total_price_including_tax += $item->total_price_including_tax;
-	        $order->total_tax_amount += $item->total_tax_amount;
+        $order->total_price_including_tax = 0;
+        $order->total_tax_amount = 0;
+        foreach ($order->orderDetails as $item) {
+            $order->total_price_excluding_tax += $item->total_price_excluding_tax;
+            $order->total_price_including_tax += $item->total_price_including_tax;
+            $order->total_tax_amount += $item->total_tax_amount;
         }
         $order->save();
 
@@ -96,10 +96,10 @@ class AdminController extends Controller
 
     public function updateStatus(Request $request)
     {
-    	$order = Order::find($request->id);
-    	$klarnaOrderID = $order->klarna_reference;
+        $order = Order::find($request->id);
+        $klarnaOrderID = $order->klarna_reference;
 
-		$this->order = new \Klarna_Checkout_Order($this->connector, $klarnaOrderID);
+        $this->order = new \Klarna_Checkout_Order($this->connector, $klarnaOrderID);
 
         try {
             $this->order->fetch();
@@ -108,17 +108,17 @@ class AdminController extends Controller
             var_dump($e->getPayload());
         }
 
-    	$order->status = $request->status;
-    	$order->save();
+        $order->status = $request->status;
+        $order->save();
 
-    	if($request->status == 'Levererad') {
-    		$update['status'] = 'created';
+        if ($request->status == 'Levererad') {
+            $update['status'] = 'created';
             // $update['merchant_reference'] = array(
             //     "orderid1" => "someUniqueId..."
             // );
             $this->order->update($update);
-    	}
+        }
 
-    	return;
+        return;
     }
 }

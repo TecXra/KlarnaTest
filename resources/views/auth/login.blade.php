@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('header')
-    <META NAME="ROBOTS" CONTENT="NOINDEX, FOLLOW">
+<META NAME="ROBOTS" CONTENT="NOINDEX, FOLLOW">
 @endsection
 
 @section('content')
@@ -22,26 +22,26 @@
         <div class="col-sm-12 col-sm-offset-3">
             <h1 class="section-title-inner"><span><i class="fa fa-lock"></i> Logga in</span></h1>
 
-             @if (count($errors) > 0)
-                <div class="row">
-                    <div class="col-sm-6 alert alert-danger" style="margin-left:15px;">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+            @if (count($errors) > 0)
+            <div class="row">
+                <div class="col-sm-6 alert alert-danger" style="margin-left:15px;">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
+            </div>
             @endif
 
             @if (session()->has('flash_message'))
-                <div class="row">
-                    <div class="col-sm-6 alert alert-{{ session('flash_message.level') }}" style="margin-left:15px; margin-right:15px">
-                        <ul>
-                            <li>{{ session('flash_message.message') }}</li>
-                        </ul>
-                    </div>
+            <div class="row">
+                <div class="col-sm-6 alert alert-{{ session('flash_message.level') }}" style="margin-left:15px; margin-right:15px">
+                    <ul>
+                        <li>{{ session('flash_message.message') }}</li>
+                    </ul>
                 </div>
+            </div>
             @endif
             <div class="row userInfo">
 
@@ -61,41 +61,41 @@
                             <label>
                                 <input type="checkbox" name="checkbox">
                                 Kom ihåg mig </label>
-                        </div> --}}
-                        <div class="form-group">
-                            <p><a title="Recover your forgotten password" href="{{ url('losenord/aterstall') }}">Glömt lösenord? </a></p>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i> Logga in
-                        </button>
-                    
-                        {{-- <a class="btn btn-primary" href="account.html"><i class="fa fa-sign-in"></i> Logga in</a> --}}
+                            </div> --}}
+                            <div class="form-group">
+                                <p><a title="Recover your forgotten password" href="{{ url('losenord/aterstall') }}">Glömt lösenord? </a></p>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i> Logga in
+                            </button>
+
+                            {{-- <a class="btn btn-primary" href="account.html"><i class="fa fa-sign-in"></i> Logga in</a> --}}
 
 
-                    </form>
+                        </form>
+                    </div>
                 </div>
+                <!--/row end-->
+
             </div>
-            <!--/row end-->
 
+            <div class="col-lg-3 col-md-3 col-sm-5"></div>
         </div>
+        <!--/row-->
 
-        <div class="col-lg-3 col-md-3 col-sm-5"></div>
+        <div style="clear:both"></div>
     </div>
-    <!--/row-->
+    <!-- /wrapper -->
 
-    <div style="clear:both"></div>
-</div>
-<!-- /wrapper -->
+    <div class="gap"></div>
+    @endsection
 
-<div class="gap"></div>
-@endsection
+    @section('footer')
+    <!-- include validate.js // jquery plugin   -->
+    <script src="assets/js/jquery.validate.js"></script>
 
-@section('footer')
-<!-- include validate.js // jquery plugin   -->
-<script src="assets/js/jquery.validate.js"></script>
-
-<script>
-    $().ready(function () {
+    <script>
+        $().ready(function () {
         // validate the comment form when it is submitted
         $("#regForm").validate();
 

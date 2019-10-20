@@ -62,13 +62,13 @@ class CheckoutController extends Controller
     private $path_parts;
     private $redirect_url;
     private $terminal;
-    
+
     public function __construct()
     {
         if (\App::environment('production')) {
             $this->merchantId = "495897";
             $this->token = "n+3F*Ec4";
-            $this->wsdl="https://epayment.nets.eu/netaxept.svc?wsdl";
+            $this->wsdl = "https://epayment.nets.eu/netaxept.svc?wsdl";
             $this->terminal = "https://epayment.nets.eu/terminal/default.aspx";
         } else {
             $this->merchantId = "12001876";
@@ -80,12 +80,14 @@ class CheckoutController extends Controller
         $this->path_parts = pathinfo($_SERVER["PHP_SELF"]);
         $this->redirect_url = url('processNetsPayement');
     }
-    
+
     public function saveOrderInfo(Request $request)
     {
 
         $request->ssn = str_replace([' ', '-'], ['', ''], $request->ssn);
-        if(strlen($request->ssn) == 12) { $request->ssn = substr($request->ssn, 2);}
+        if (strlen($request->ssn) == 12) {
+            $request->ssn = substr($request->ssn, 2);
+        }
 
         $request->InputBillingPhoneNumber = str_replace([' ', '-'], ['', ''], $request->InputBillingPhoneNumber);
         $request->InputBillingPostalCode = str_replace([' ', '-'], ['', ''], $request->InputBillingPostalCode);
@@ -101,14 +103,14 @@ class CheckoutController extends Controller
         $request->session()->put('orderInfo.companyName', $request->InputCompanyName);
         $isCompany = isset($request->isCompanyCheckout) ? $request->isCompanyCheckout : 0;
         $request->session()->put('orderInfo.isCompany', $isCompany);
-        $request->session()->put('orderInfo.billingFullName', $request->InputFirstName ." ".$request->InputLastName);
+        $request->session()->put('orderInfo.billingFullName', $request->InputFirstName . " " . $request->InputLastName);
         $request->session()->put('orderInfo.billingPhoneNumber', $request->InputBillingPhoneNumber);
         $request->session()->put('orderInfo.billingAddress', $request->InputBillingAddress);
         $request->session()->put('orderInfo.billingPostalCode', $request->InputBillingPostalCode);
         $request->session()->put('orderInfo.billingCity', $request->InputBillingCity);
         $request->session()->put('orderInfo.billingCountry', 'SE');
-        
-        if(isset($request->deliveryAdress)) {
+
+        if (isset($request->deliveryAdress)) {
             $request->session()->put('orderInfo.shippingFullName', $request->InputShippingFullName);
             $request->session()->put('orderInfo.shippingPhoneNumber', $request->InputShippingPhoneNumber);
             $request->session()->put('orderInfo.shippingAddress', $request->InputShippingAddress);
@@ -117,7 +119,7 @@ class CheckoutController extends Controller
             // $request->session()->put('orderInfo.shippingCountry', $request->InputShippingCountry);
             $request->session()->put('orderInfo.shippingCountry', 'SE');
         } else {
-            $request->session()->put('orderInfo.shippingFullName', $request->InputFirstName ." ".$request->InputLastName);
+            $request->session()->put('orderInfo.shippingFullName', $request->InputFirstName . " " . $request->InputLastName);
             $request->session()->put('orderInfo.shippingPhoneNumber', $request->InputBillingPhoneNumber);
             $request->session()->put('orderInfo.shippingAddress', $request->InputBillingAddress);
             $request->session()->put('orderInfo.shippingPostalCode', $request->InputBillingPostalCode);
@@ -127,22 +129,22 @@ class CheckoutController extends Controller
         }
 
         $request->session()->put('orderInfo.regNumber', $request->InputRegNumber);
-        $request->session()->put('orderInfo.reference', $request->InputReference );
-        $request->session()->put('orderInfo.message', $request->message );
+        $request->session()->put('orderInfo.reference', $request->InputReference);
+        $request->session()->put('orderInfo.message', $request->message);
         $request->session()->put('orderInfo.token', bin2hex(openssl_random_pseudo_bytes(16)));
         $request->session()->put('orderInfo.ipNumber', $request->ip());
         $tireQty = $rimsQty = 0;
         $cantOrder = false;
         if (sizeof(Cart::content()) > 0) {
-            foreach(Cart::content() as $item) {
-                 if($item->options->product_category_id == 1)
-                     $tireQty += $item->qty;
-                 if($item->options->product_category_id == 2)
-                     $rimsQty += $item->qty;
+            foreach (Cart::content() as $item) {
+                if ($item->options->product_category_id == 1)
+                    $tireQty += $item->qty;
+                if ($item->options->product_category_id == 2)
+                    $rimsQty += $item->qty;
             }
         }
-        $cantOrder = ($tireQty>0 and $tireQty<4) ? true : $cantOrder;
-        $cantOrder = ($rimsQty>0 and $rimsQty<4) ? true : $cantOrder;
+        $cantOrder = ($tireQty > 0 and $tireQty < 4) ? true : $cantOrder;
+        $cantOrder = ($rimsQty > 0 and $rimsQty < 4) ? true : $cantOrder;
 
         if ($cantOrder) {
             session()->flash('error_message', 'Obs! vid beställning av däck/fälg, är minsta tillåtna antal 4 st däck.');
@@ -151,8 +153,9 @@ class CheckoutController extends Controller
             ];
         }
 
-        if(Auth::check()) {
-            if(Auth::user()->user_type_id == 5) {
+        if (Auth::check()) {
+
+            if (Auth::user()->user_type_id == 5) {
                 $this->paymentType = "ABSWheels Faktura";
                 $this->isPaymentRejected = '';
                 $this->cardType = '';
@@ -163,18 +166,18 @@ class CheckoutController extends Controller
                 $this->saveOrderDetails();
                 $this->saveCarData();
 
-                 Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($this->order, $this->password));
-                 Mail::to(env('MAIL_FROM_ADDRESS'))->send(new OrderConfirmationCC($this->order, $this->password));
-                 Mail::to(Session::get('orderInfo.email'))->send(new Recite($this->order));
+                Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($this->order, $this->password));
+                Mail::to(env('MAIL_FROM_ADDRESS'))->send(new OrderConfirmationCC($this->order, $this->password));
+                Mail::to(Session::get('orderInfo.email'))->send(new Recite($this->order));
 
-                return [ 
+
+                return [
                     'token' => $this->order->token,
                     'isAdmin' => true,
                     'isValidOrder' => true
                 ];
             }
         }
-
         $request->session()->put('orderInfo.deliveryId', 1);
         $cartCalculator = new CartCalculator;
 
@@ -188,33 +191,35 @@ class CheckoutController extends Controller
             'isValidOrder' => true
         ];
     }
-    private function avardaRequest($requestMethod, $data){
+    private function avardaRequest($requestMethod, $data)
+    {
         if (\App::environment('production')) {
             $username = 'hjulonline';
             $password = 'Q66h64_746n48=d';
-            $host = "https://online.avarda.org/CheckOut2/CheckOut2Api/".$requestMethod;
-        }else{
+            $host = "https://online.avarda.org/CheckOut2/CheckOut2Api/" . $requestMethod;
+        } else {
             $username = 'Hjulonline_TEST';
             $password = 'hjulonline_test';
-            $host = "https://stage.avarda.org/CheckOut2/CheckOut2Api/".$requestMethod;
+            $host = "https://stage.avarda.org/CheckOut2/CheckOut2Api/" . $requestMethod;
         }
 
-        $headers[] = 'Authorization: Basic ' . base64_encode($username.':'.$password);
+        $headers[] = 'Authorization: Basic ' . base64_encode($username . ':' . $password);
         $headers[] = 'Content-Type: application/json';
 
 
         $apiResponse = $this->CallAPIHeader("POST", $headers, $host, $data);
 
         return $apiResponse;
-
     }
-    public function avardaPaymentInitialize(Request $request){
-        $tempName = explode( " ", $request->session()->get('orderInfo.shippingFullName'));
+    public function avardaPaymentInitialize(Request $request)
+    {
+        $tempName = explode(" ", $request->session()->get('orderInfo.shippingFullName'));
         $shippingLastName = end($tempName);
-        array_splice( $tempName, -1 );
-        $shippingFirstName = implode( " ", $tempName );
+        array_splice($tempName, -1);
+        $shippingFirstName = implode(" ", $tempName);
 
-        $data = array("Description" => "Hjulonline PaymentInitialize",
+        $data = array(
+            "Description" => "Hjulonline PaymentInitialize",
             "Phone" => $request->session()->get('orderInfo.billingPhoneNumber'),
             "Mail" => $request->session()->get('orderInfo.email'),
             "IsPhoneAndMailEditable" => false,
@@ -234,18 +239,19 @@ class CheckoutController extends Controller
             "UseDifferentDeliveryAddress" => false,
             "UserLanguageCode" => "sv-SE",
             "Price" => 0,
-            "Items" => array());
+            "Items" => array()
+        );
 
-        foreach(Cart::content() as $item){
-            $itemPrice = (float)($item->total);
+        foreach (Cart::content() as $item) {
+            $itemPrice = (float) ($item->total);
             $data["Price"] += $itemPrice;
-            $itemTaxAmount = $itemPrice - (float)($item->subtotal);
+            $itemTaxAmount = $itemPrice - (float) ($item->subtotal);
 
             $data["Items"][] = array("Amount" => $itemPrice, "TaxCode" => 25, "TaxAmount" => $itemTaxAmount, "Description" => substr($item->name, 0, 35));
         }
         $cartCalculator = new CartCalculator;
         $shippintCost = $cartCalculator->totalPriceShipping();
-        $shippintCostTax = $cartCalculator->totalPriceShipping()*0.2;
+        $shippintCostTax = $cartCalculator->totalPriceShipping() * 0.2;
         $data["Items"][] = array("Amount" => $shippintCost, "TaxCode" => 25, "TaxAmount" => $shippintCostTax, "Description" => "Fraktkostnad");
         $data["Price"] += $shippintCost;
         //var_dump($data);
@@ -267,20 +273,20 @@ class CheckoutController extends Controller
     {
         $avardaHTML = '';
         //$callBackUrl =  URL::to("/avarda_callback");
-        if(isset($response->CheckOutErrorCode)){
-            foreach($response->Errors as $errorText)
-                $avardaHTML .= '<div class="col-sm-12 text-center text-danger" style="font-size:18px; margin-bottom: 15px;">'.$errorText.'</div>';
-        }else{
+        if (isset($response->CheckOutErrorCode)) {
+            foreach ($response->Errors as $errorText)
+                $avardaHTML .= '<div class="col-sm-12 text-center text-danger" style="font-size:18px; margin-bottom: 15px;">' . $errorText . '</div>';
+        } else {
             $avardaHTML = '<div class="col-sm-12 text-center" style="font-size:18px; margin-bottom: 15px;">
                 <div id="checkOutDiv"></div>
-                </div><script>var options={divId:"checkOutDiv",purchaseId:"'.$response.'",callbackUrl:"'.URL::to("/avarda_callback").'",done:function(e){window.location.href="/avarda_success?purchaseId="+e}};AvardaCheckOutClient.init(options);</script>';
+                </div><script>var options={divId:"checkOutDiv",purchaseId:"' . $response . '",callbackUrl:"' . URL::to("/avarda_callback") . '",done:function(e){window.location.href="/avarda_success?purchaseId="+e}};AvardaCheckOutClient.init(options);</script>';
         }
 
         return $avardaHTML;
     }
     public function avardaCallback(Request $request)
     {
-        if(sizeof(Cart::content()) > 0 and $request->callback=='2') {
+        if (sizeof(Cart::content()) > 0 and $request->callback == '2') {
             if (\App::environment('production'))
                 echo '<script src="https://online.avarda.org/CheckOut2/Scripts/CheckOutClient.js"></script>';
             else
@@ -290,7 +296,7 @@ class CheckoutController extends Controller
             echo $avardaHTML = '<div class="col-sm-12 text-center" style="font-size:18px; margin-bottom: 15px;">
                 <div id="checkOutDiv"></div>
                 </div><script>var options={divId:"checkOutDiv",purchaseId:"' . $request->purchaseId . '",callbackUrl:"' . URL::to("/avarda_callback") . '",done:function(e){window.location.href="/avarda_success?purchaseId="+e}};AvardaCheckOutClient.init(options);</script>';
-        }else{
+        } else {
             return abort(404);
         }
     }
@@ -302,23 +308,23 @@ class CheckoutController extends Controller
         $response = json_decode($apiResponse);
 
         $orderExist = Order::where('transaction_id', $request->purchaseId)->get(['id'])->first();
-        if(empty($orderExist->id)){
-            $tempAddress = $response->InvoicingAddressLine1.($response->InvoicingAddressLine2!='' ? ' '.$response->InvoicingAddressLine2 : '');
+        if (empty($orderExist->id)) {
+            $tempAddress = $response->InvoicingAddressLine1 . ($response->InvoicingAddressLine2 != '' ? ' ' . $response->InvoicingAddressLine2 : '');
 
             $request->session()->put('orderInfo.firstName', $response->InvoicingFirstName);
             $request->session()->put('orderInfo.lastName', $response->InvoicingLastName);
             $request->session()->put('orderInfo.email', $response->Mail);
-            $request->session()->put('orderInfo.billingFullName', $response->InvoicingFirstName ." ".$response->InvoicingLastName);
+            $request->session()->put('orderInfo.billingFullName', $response->InvoicingFirstName . " " . $response->InvoicingLastName);
             $request->session()->put('orderInfo.billingPhoneNumber', $response->Phone);
             $request->session()->put('orderInfo.billingAddress', $tempAddress);
             $request->session()->put('orderInfo.billingPostalCode', $response->InvoicingZip);
             $request->session()->put('orderInfo.billingCity', $response->InvoicingCity);
             $request->session()->put('orderInfo.billingCountry', 'SE');
 
-            if(isset($response->DeliveryAddressLine1) and $response->DeliveryAddressLine1!='') {
-                $tempAddress2 = $response->DeliveryAddressLine1.($response->DeliveryAddressLine2!='' ? ' '.$response->DeliveryAddressLine2 : '');
+            if (isset($response->DeliveryAddressLine1) and $response->DeliveryAddressLine1 != '') {
+                $tempAddress2 = $response->DeliveryAddressLine1 . ($response->DeliveryAddressLine2 != '' ? ' ' . $response->DeliveryAddressLine2 : '');
 
-                $request->session()->put('orderInfo.shippingFullName', $response->DeliveryFirstName ." ".$response->DeliveryLastName);
+                $request->session()->put('orderInfo.shippingFullName', $response->DeliveryFirstName . " " . $response->DeliveryLastName);
                 $request->session()->put('orderInfo.shippingPhoneNumber', $response->Phone);
                 $request->session()->put('orderInfo.shippingAddress', $tempAddress2);
                 $request->session()->put('orderInfo.shippingPostalCode', $response->DeliveryZip);
@@ -326,7 +332,7 @@ class CheckoutController extends Controller
                 // $request->session()->put('orderInfo.shippingCountry', $request->InputShippingCountry);
                 $request->session()->put('orderInfo.shippingCountry', 'SE');
             } else {
-                $request->session()->put('orderInfo.shippingFullName', $response->InvoicingFirstName ." ".$response->InvoicingLastName);
+                $request->session()->put('orderInfo.shippingFullName', $response->InvoicingFirstName . " " . $response->InvoicingLastName);
                 $request->session()->put('orderInfo.shippingPhoneNumber', $response->Phone);
                 $request->session()->put('orderInfo.shippingAddress', $tempAddress);
                 $request->session()->put('orderInfo.shippingPostalCode', $response->InvoicingZip);
@@ -335,32 +341,32 @@ class CheckoutController extends Controller
                 $request->session()->put('orderInfo.shippingCountry', 'SE');
             }
 
-            Session::put('orderInfo.deliveryMaxTime', 0 );
-            foreach(Cart::content() as $item) {
+            Session::put('orderInfo.deliveryMaxTime', 0);
+            foreach (Cart::content() as $item) {
 
                 $this->ajust[$item->id] = "";
-                if($item->options->pcd != null) {
+                if ($item->options->pcd != null) {
                     $this->ajust[$item->id] = $item->options->pcd;
                 }
 
                 $maxNumber = 0;
-                if($item->model->delivery_time) {
+                if ($item->model->delivery_time) {
                     preg_match_all('!\d+!', $item->model->delivery_time, $number);
                     $maxNumber = max(max($number));
                 }
 
-                if(Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
+                if (Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
                     Session::put('orderInfo.deliveryMaxTime', $maxNumber);
                     Session::put('orderInfo.deliveryTime', $item->model->delivery_time);
                 }
             }
-            Session::put('orderInfo.ajust',  $this->ajust );
+            Session::put('orderInfo.ajust',  $this->ajust);
 
             $this->paymentType = "Avarda";
-            $this->isPaymentRejected = $response->State!=2 ? 1 : 0;
+            $this->isPaymentRejected = $response->State != 2 ? 1 : 0;
             $this->cardType = '';
             $this->maskedCardNumber = '';
-            $this->orderStatusId = $response->State==2 ? 1 : 0;
+            $this->orderStatusId = $response->State == 2 ? 1 : 0;
             $this->saveUser();
             $this->saveOrder();
 
@@ -382,8 +388,8 @@ class CheckoutController extends Controller
             //Mail::to(env('MAIL_FROM_ADDRESS'))->send(new OrderConfirmationCC($this->order, $this->password));
             //Mail::to(Session::get('orderInfo.email'))->send(new Recite($order));
             Session::forget('password');
-            return redirect("orderbekraftelse/".Session::get('orderInfo.token'));
-        }else{
+            return redirect("orderbekraftelse/" . Session::get('orderInfo.token'));
+        } else {
             $data = array("PurchaseId" => $request->purchaseId, "OrderNumber" => $orderExist->id);
             $data = json_encode($data);
             $this->avardaRequest("UpdateOrderNumber", $data);
@@ -391,27 +397,30 @@ class CheckoutController extends Controller
             return abort(404);
         }
     }
-    public function purchaseAvardaPayment(Request $request){
+    public function purchaseAvardaPayment(Request $request)
+    {
         //echo $request->session()->get('orderInfo.ssn');
         //exit;
         exit;
         $orderID = $request->id;
         $purchaseID = $request->purchaseid;
-        $data = array("ExternalId" => $purchaseID,
+        $data = array(
+            "ExternalId" => $purchaseID,
             "OrderReference" => $orderID,
-            "Items" => array());
+            "Items" => array()
+        );
 
         $order = Order::findOrFail($orderID);
 
-        foreach($order->orderDetails as $item){
-            $itemPrice = (float)($item->total_price_including_tax);
-            $itemTaxAmount = $itemPrice - (float)($item->total_price_excluding_tax);
+        foreach ($order->orderDetails as $item) {
+            $itemPrice = (float) ($item->total_price_including_tax);
+            $itemTaxAmount = $itemPrice - (float) ($item->total_price_excluding_tax);
 
             $data["Items"][] = array("Amount" => $itemPrice, "TaxCode" => 25, "TaxAmount" => $itemTaxAmount, "Description" => substr($item->product_name, 0, 35));
         }
 
         $shippintCost = $order->shipping_fee;
-        $shippintCostTax = $order->shipping_fee*0.2;
+        $shippintCostTax = $order->shipping_fee * 0.2;
         $data["Items"][] = array("Amount" => $shippintCost, "TaxCode" => 25, "TaxAmount" => $shippintCostTax, "Description" => "Fraktkostnad");
 
         //echo '<pre>';
@@ -430,7 +439,8 @@ class CheckoutController extends Controller
         echo '</pre>';
         exit;
     }
-    public function getNetsHTML(Request $request){
+    public function getNetsHTML(Request $request)
+    {
         $netsPaymentForm = $this->createNetsForm();
         return [
             'netsPaymentForm' => $netsPaymentForm,
@@ -440,28 +450,28 @@ class CheckoutController extends Controller
     }
     public function createNetsForm()
     {
-        Session::put('orderInfo.deliveryMaxTime', 0 );
-        
+        Session::put('orderInfo.deliveryMaxTime', 0);
 
-        foreach(Cart::content() as $item) {
-            
+
+        foreach (Cart::content() as $item) {
+
             $this->ajust[$item->id] = "";
-            if($item->options->pcd != null) {
+            if ($item->options->pcd != null) {
                 $this->ajust[$item->id] = $item->options->pcd;
             }
 
             $maxNumber = 0;
-            if($item->model->delivery_time) {
+            if ($item->model->delivery_time) {
                 preg_match_all('!\d+!', $item->model->delivery_time, $number);
                 $maxNumber = max(max($number));
             }
 
-            if(Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
+            if (Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
                 Session::put('orderInfo.deliveryMaxTime', $maxNumber);
                 Session::put('orderInfo.deliveryTime', $item->model->delivery_time);
             }
         }
-        Session::put('orderInfo.ajust',  $this->ajust );
+        Session::put('orderInfo.ajust',  $this->ajust);
 
 
         $this->paymentType = "Kort";
@@ -472,16 +482,16 @@ class CheckoutController extends Controller
         $this->saveUser();
         $this->saveOrder();
 
-        if($this->password)
+        if ($this->password)
             Session::put('password', $this->password);
-        
+
         // $cartCalculator = new CartCalculator;
 
         ####  PARAMETERS IN ORDER  ####
-        $amount               = $this->order->total_price_including_tax * 100;//$amount; // The amount described as the lowest monetary unit, example: 100,00 NOK is noted as "10000", 9.99 USD is noted as "999".
-        $currencyCode         = 'SEK';//$Currency;  //The currency code, following ISO 4217. Typical examples include "NOK" and "USD".
+        $amount               = $this->order->total_price_including_tax * 100; //$amount; // The amount described as the lowest monetary unit, example: 100,00 NOK is noted as "10000", 9.99 USD is noted as "999".
+        $currencyCode         = 'SEK'; //$Currency;  //The currency code, following ISO 4217. Typical examples include "NOK" and "USD".
         $force3DSecure        = null;   // Optional parameter
-        $orderNumber          = $this->order->id;//$tempOrderID;
+        $orderNumber          = $this->order->id; //$tempOrderID;
         $UpdateStoredPaymentInfo = null;
 
 
@@ -511,61 +521,59 @@ class CheckoutController extends Controller
         $transactionReconRef  = null; // Optional parameter
 
         ####  ENVIRONMENT OBJECT  ####
-        $Environment = new \Nets\Environment($Language,$OS,$WebServicePlatform);
+        $Environment = new \Nets\Environment($Language, $OS, $WebServicePlatform);
 
         ####  TERMINAL OBJECT  ####
-        $Terminal = new \Nets\Terminal($autoAuth,$paymentMethodList,$language,$orderDescription,$redirectOnError,$this->redirect_url);
+        $Terminal = new \Nets\Terminal($autoAuth, $paymentMethodList, $language, $orderDescription, $redirectOnError, $this->redirect_url);
 
         $ArrayOfItem = null; // no goods for Klana ==> normal transaction
         ####  ORDER OBJECT  ####
-        $Order = new \Nets\Order($amount,$currencyCode,$force3DSecure,$ArrayOfItem,$orderNumber,$UpdateStoredPaymentInfo);
+        $Order = new \Nets\Order($amount, $currencyCode, $force3DSecure, $ArrayOfItem, $orderNumber, $UpdateStoredPaymentInfo);
 
 
         ####  START REGISTER REQUEST  ####
-        $RegisterRequest = new \Nets\RegisterRequest($AvtaleGiro,$CardInfo,$Customer,$description,$DnBNorDirectPayment,$Environment,$MicroPayment,$Order,$Recurring,$serviceType,$Terminal,$transactionId,$transactionReconRef);
+        $RegisterRequest = new \Nets\RegisterRequest($AvtaleGiro, $CardInfo, $Customer, $description, $DnBNorDirectPayment, $Environment, $MicroPayment, $Order, $Recurring, $serviceType, $Terminal, $transactionId, $transactionReconRef);
 
 
         ####  ARRAY WITH REGISTER PARAMETERS  ####
-        $InputParametersOfRegister = array
-        (
-                "token"                 => $this->token,
-                "merchantId"            => $this->merchantId,
-                "request"               => $RegisterRequest
+        $InputParametersOfRegister = array(
+            "token"                 => $this->token,
+            "merchantId"            => $this->merchantId,
+            "request"               => $RegisterRequest
         );
 
 
         try {
-            if (strpos($_SERVER["HTTP_HOST"], 'uapp') > 0){
+            if (strpos($_SERVER["HTTP_HOST"], 'uapp') > 0) {
                 // Creating new client having proxy
-                $client = new \SoapClient($this->wsdl, array('proxy_host' => "isa4", 'proxy_port' => 8080, 'trace' => true,'exceptions' => true));
+                $client = new \SoapClient($this->wsdl, array('proxy_host' => "isa4", 'proxy_port' => 8080, 'trace' => true, 'exceptions' => true));
             } else {
                 // Creating new client without proxy
-                $client = new \SoapClient($this->wsdl, array('trace' => true,'exceptions' => true ));
+                $client = new \SoapClient($this->wsdl, array('trace' => true, 'exceptions' => true));
             }
 
-            $OutputParametersOfRegister = $client->__call('Register' , array("parameters"=>$InputParametersOfRegister));
+            $OutputParametersOfRegister = $client->__call('Register', array("parameters" => $InputParametersOfRegister));
 
             // RegisterResult
-            $RegisterResult = $OutputParametersOfRegister->RegisterResult; 
+            $RegisterResult = $OutputParametersOfRegister->RegisterResult;
 
-            $terminal_parameters = "?merchantId=".$this->merchantId."&transactionId=".$RegisterResult->TransactionId;  
-            $process_parameters = "?transactionId=".$RegisterResult->TransactionId;  
+            $terminal_parameters = "?merchantId=" . $this->merchantId . "&transactionId=" . $RegisterResult->TransactionId;
+            $process_parameters = "?transactionId=" . $RegisterResult->TransactionId;
             // error_log('Kreditkort initialized. Ordernr: '.$tempOrderID);
 
             $netsPaymentForm = '
                 <div class="col-sm-12 text-center" style="font-size:18px; margin-bottom: 15px;"><strong>Vi tillhandahåller säker kortbetalning för att hålla ner administrativa avgifter, vilket i sin tur håller ner priserna på dina däck och fälgar.</strong></div>
                 <div class="col-sm-12">
-                    <iframe src="'. $this->terminal.$terminal_parameters . '" height="400" width="100%" scrolling="auto"></iframe>
+                    <iframe src="' . $this->terminal . $terminal_parameters . '" height="400" width="100%" scrolling="auto"></iframe>
                 </div><br>
                 <div class="col-sm-12 text-center text-danger" style="font-size:18px"><strong>*Viktigt! Ditt kort ska vara öppet för internetköp.</strong></div>';
-
-        } catch (\SoapFault $fault) { 
+        } catch (\SoapFault $fault) {
             $netsPaymentForm = '<div class="row">
               <div class="col-sm-12">
-                <div class="alert alert-danger">'. $fault->faultstring.'</div>
+                <div class="alert alert-danger">' . $fault->faultstring . '</div>
               </div>
             </div>';
-        } 
+        }
 
         // dd($netsPaymentForm);
 
@@ -586,18 +594,18 @@ class CheckoutController extends Controller
 
         $transactionId = "";
         if (isset($request->transactionId)) {
-          $transactionId = $request->transactionId;
+            $transactionId = $request->transactionId;
         }
 
         $responseCode = "";
         if (isset($request->responseCode)) {
-          $responseCode = $request->responseCode;
+            $responseCode = $request->responseCode;
         }
 
         // this is an example is showing how to add one (or several additional parameters on the terminal)
         $webshopParameter = "";
         if (isset($request->webshopParameter)) {
-          $webshopParameter = $request->webshopParameter;
+            $webshopParameter = $request->webshopParameter;
         }
 
         $processResponse = '';
@@ -611,22 +619,21 @@ class CheckoutController extends Controller
 
         $processResponse .= "webshopParameter= " . $webshopParameter . "<br/>";
 
-        $process_parameters = "?transactionId=" .  $transactionId;  
+        $process_parameters = "?transactionId=" .  $transactionId;
 
-        if ($responseCode == "OK")
-        {
-          $processResponse .= "<br/>ResponseCode is OK, so you can call manually following action:";
+        if ($responseCode == "OK") {
+            $processResponse .= "<br/>ResponseCode is OK, so you can call manually following action:";
 
-          $processResponse .= "<h3><a href='" . url('callingAuth'.$process_parameters) . "'>Calling Auth</a></h3>";
-          $processResponse .= "<h3><a href='" . url('callingSale'.$process_parameters) . "'>Calling Sale</a></h3>";
-          $processResponse .= "<h3><a href='" . url('callingQuery'.$process_parameters) . "'>Calling Query</a></h3>";
-          // in PRODUCTION environment: you will run a query at this stage
-          // and read the AuthenticationInformation in order to decide if you will offer your client to call Auth or Sale
-          // e.g. $AuthenticationInformation = $OutputParametersOfQuery->QueryResult->AuthenticationInformation; 
-          //      $AuthenticationInformation->AuthenticatedStatus 
-          //      $AuthenticationInformation->AuthenticatedWith 
-          //      $AuthenticationInformation->ECI
-            
+            $processResponse .= "<h3><a href='" . url('callingAuth' . $process_parameters) . "'>Calling Auth</a></h3>";
+            $processResponse .= "<h3><a href='" . url('callingSale' . $process_parameters) . "'>Calling Sale</a></h3>";
+            $processResponse .= "<h3><a href='" . url('callingQuery' . $process_parameters) . "'>Calling Query</a></h3>";
+            // in PRODUCTION environment: you will run a query at this stage
+            // and read the AuthenticationInformation in order to decide if you will offer your client to call Auth or Sale
+            // e.g. $AuthenticationInformation = $OutputParametersOfQuery->QueryResult->AuthenticationInformation; 
+            //      $AuthenticationInformation->AuthenticatedStatus 
+            //      $AuthenticationInformation->AuthenticatedWith 
+            //      $AuthenticationInformation->ECI
+
             // $order = Order::find(Session::get('orderId'));
             $order = Order::find(Session::get('orderId'));
             $this->callingSale($transactionId);
@@ -642,10 +649,10 @@ class CheckoutController extends Controller
             echo "<head>";
             echo "<title>Form submitted</title>";
             // echo "<script type='text/javascript'>window.top.location.href = '" . url('callingSale'.$process_parameters) . "';</script>";
-            echo "<script type='text/javascript'>window.top.location.href = '" . url('orderbekraftelse/'. $order->token) . "';</script>";
+            echo "<script type='text/javascript'>window.top.location.href = '" . url('orderbekraftelse/' . $order->token) . "';</script>";
             echo "</head>";
             echo "<body></body></html>";
-          
+
             // return $processResponse;
             // $this->callingSale($transactionId);
             // redirect('callingSale'.$process_parameters);
@@ -682,19 +689,18 @@ class CheckoutController extends Controller
 
         ####  PROCESS OBJECT  ####
         $ProcessRequest = new \Nets\ProcessRequest(
-          $description,
-          $operation,
-          $transactionAmount,
-          $transactionId,
-          $transactionReconRef
+            $description,
+            $operation,
+            $transactionAmount,
+            $transactionId,
+            $transactionReconRef
         );
 
 
-        $InputParametersOfProcess = array
-        (
-          "token"       => $this->token,
-          "merchantId"  => $this->merchantId,
-          "request"     => $ProcessRequest 
+        $InputParametersOfProcess = array(
+            "token"       => $this->token,
+            "merchantId"  => $this->merchantId,
+            "request"     => $ProcessRequest
         );
 
         $response = '';
@@ -718,100 +724,91 @@ class CheckoutController extends Controller
         */
 
         ####  START PROCESS CALL  ####
-        try 
-        {
-          if (strpos($_SERVER["HTTP_HOST"], 'uapp') > 0)
-          {
-          // Creating new client having proxy
-          $client = new \SoapClient($this->wsdl, array('proxy_host' => "isa4", 'proxy_port' => 8080, 'trace' => true,'exceptions' => true));
-          }
-          else
-          {
-          // Creating new client without proxy
-          $client = new \SoapClient($this->wsdl, array('trace' => true,'exceptions' => true ));
-          }
+        try {
+            if (strpos($_SERVER["HTTP_HOST"], 'uapp') > 0) {
+                // Creating new client having proxy
+                $client = new \SoapClient($this->wsdl, array('proxy_host' => "isa4", 'proxy_port' => 8080, 'trace' => true, 'exceptions' => true));
+            } else {
+                // Creating new client without proxy
+                $client = new \SoapClient($this->wsdl, array('trace' => true, 'exceptions' => true));
+            }
 
-          $OutputParametersOfProcess = $client->__call('Process' , array("parameters"=>$InputParametersOfProcess));
-          
-          $ProcessResult = $OutputParametersOfProcess->ProcessResult; 
-          
-          
-          $response .= "<h3><font color='gray'>Output parameters:</font></h3>";
-          $response .= "<pre>"; 
-          $response .= print_r($ProcessResult, true);
-          $response .= "</pre>";
-          
-          $response .= "<h3><font color='green'>Process call successfully done.</font></h3>";
-          
-          $process_parameters = "?transactionId=" .  $ProcessResult->TransactionId;  
+            $OutputParametersOfProcess = $client->__call('Process', array("parameters" => $InputParametersOfProcess));
 
-          if ($ProcessResult->ResponseCode == "OK")
-          {
-            // $this->paymentType = "Kort";
-            // $this->isPaymentRejected = 0;
-            // $this->cardType = '';
-            // $this->maskedCardNumber = '';
-            // $this->orderStatusId = 1;
-            // $this->saveUser();
-            // $this->saveOrder();
+            $ProcessResult = $OutputParametersOfProcess->ProcessResult;
 
 
-            $order = Order::find(Session::get('orderId'));
-            $order->order_status_id = 1;
-            $order->authorization_id = $ProcessResult->AuthorizationId;
-            $order->batch_number = $ProcessResult->BatchNumber;
-            $order->transaction_date = $ProcessResult->ExecutionTime;
-            $order->transaction_id = $ProcessResult->TransactionId;
-            $order->save();
-            $this->saveOrderDetails();
-            $this->saveCarData();
+            $response .= "<h3><font color='gray'>Output parameters:</font></h3>";
+            $response .= "<pre>";
+            $response .= print_r($ProcessResult, true);
+            $response .= "</pre>";
 
-            $this->password = Session::has('password') ? Session::get('password') : null;
-            Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($order, $this->password));
-            Mail::to(env('MAIL_FROM_ADDRESS'))->send(new OrderConfirmationCC($order, $this->password));
-            Mail::to(Session::get('orderInfo.email'))->send(new Recite($order));
-            Session::forget('password');
+            $response .= "<h3><font color='green'>Process call successfully done.</font></h3>";
 
-            $response .= "<br/>ResponseCode is OK, so you can call or Credit:";
-            $response .= "<h3><a href='callingCredit.php$process_parameters'>Calling Credit (Dont work)</a></h3>";
-            $response .= "<h3><a href='" . url('callingQuery'.$process_parameters) . "'>Calling Query</a></h3>";
-            $response .= "<h3><a href='index.php'>Test Webshops</a><h3>";
+            $process_parameters = "?transactionId=" .  $ProcessResult->TransactionId;
 
-            // return $response;
-            // $this->callingQuery($transactionId);
-            // return redirect('callingQuery'.$process_parameters);
-          }
-          else
-          {
-            // $this->paymentType = "Kort";
-            // $this->isPaymentRejected = 1;
-            // $this->cardType = '';
-            // $this->maskedCardNumber = '';
-            // $this->orderStatusId = 3;
-            // $this->saveUser();
-            // $this->saveOrder();
-            
-            $order = Order::find(Session::get('orderId'));
-            $order->order_status_id = 3;
-            $order->is_payment_rejected = 1;
-            $order->comment = "Kortbetalningen godkändes ej.";
-            $order->save();
+            if ($ProcessResult->ResponseCode == "OK") {
+                // $this->paymentType = "Kort";
+                // $this->isPaymentRejected = 0;
+                // $this->cardType = '';
+                // $this->maskedCardNumber = '';
+                // $this->orderStatusId = 1;
+                // $this->saveUser();
+                // $this->saveOrder();
 
-            $this->order->comment = "Kortbetalningen godkändes ej.";
-            $this->order->save();
 
-            Session::flash('error_message', 'Betalningen gick inte igenom. Säkerställ att du har angett rätt kortuppgifter och att du har tillräckligt med pengar på kortet. Om du fortfarande inte vet varför betalningen inte går igenom, vänligen kontakta support för hjälp.');
-            echo "<!DOCTYPE html>";
-            echo "<head>";
-            echo "<title>Form submitted</title>";
-            echo "<script type='text/javascript'>window.parent.location.reload()</script>";
-            echo "</head>";
-            echo "<body></body></html>";
-          }
-          
+                $order = Order::find(Session::get('orderId'));
+                $order->order_status_id = 1;
+                $order->authorization_id = $ProcessResult->AuthorizationId;
+                $order->batch_number = $ProcessResult->BatchNumber;
+                $order->transaction_date = $ProcessResult->ExecutionTime;
+                $order->transaction_id = $ProcessResult->TransactionId;
+                $order->save();
+                $this->saveOrderDetails();
+                $this->saveCarData();
+
+                $this->password = Session::has('password') ? Session::get('password') : null;
+                Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($order, $this->password));
+                Mail::to(env('MAIL_FROM_ADDRESS'))->send(new OrderConfirmationCC($order, $this->password));
+                Mail::to(Session::get('orderInfo.email'))->send(new Recite($order));
+                Session::forget('password');
+
+                $response .= "<br/>ResponseCode is OK, so you can call or Credit:";
+                $response .= "<h3><a href='callingCredit.php$process_parameters'>Calling Credit (Dont work)</a></h3>";
+                $response .= "<h3><a href='" . url('callingQuery' . $process_parameters) . "'>Calling Query</a></h3>";
+                $response .= "<h3><a href='index.php'>Test Webshops</a><h3>";
+
+                // return $response;
+                // $this->callingQuery($transactionId);
+                // return redirect('callingQuery'.$process_parameters);
+            } else {
+                // $this->paymentType = "Kort";
+                // $this->isPaymentRejected = 1;
+                // $this->cardType = '';
+                // $this->maskedCardNumber = '';
+                // $this->orderStatusId = 3;
+                // $this->saveUser();
+                // $this->saveOrder();
+
+                $order = Order::find(Session::get('orderId'));
+                $order->order_status_id = 3;
+                $order->is_payment_rejected = 1;
+                $order->comment = "Kortbetalningen godkändes ej.";
+                $order->save();
+
+                $this->order->comment = "Kortbetalningen godkändes ej.";
+                $this->order->save();
+
+                Session::flash('error_message', 'Betalningen gick inte igenom. Säkerställ att du har angett rätt kortuppgifter och att du har tillräckligt med pengar på kortet. Om du fortfarande inte vet varför betalningen inte går igenom, vänligen kontakta support för hjälp.');
+                echo "<!DOCTYPE html>";
+                echo "<head>";
+                echo "<title>Form submitted</title>";
+                echo "<script type='text/javascript'>window.parent.location.reload()</script>";
+                echo "</head>";
+                echo "<body></body></html>";
+            }
         } // End try
-        catch (\SoapFault $fault) 
-        {
+        catch (\SoapFault $fault) {
             Session::flash('error_message', 'Error: fel uppstod i betalningsprocessen. Säkerställ att du har angett rätt kortuppgifter och att du har tillräckligt med pengar på kortet. Om du fortfarande inte vet varför betalningen inte går igenom, vänligen kontakta support för hjälp.');
 
             echo "<!DOCTYPE html>";
@@ -823,7 +820,7 @@ class CheckoutController extends Controller
         } // End catch
     }
 
-    public function callingQuery($transactionId )
+    public function callingQuery($transactionId)
     {
         // $transactionId = '';
         // if($request->transactionId) {
@@ -840,55 +837,49 @@ class CheckoutController extends Controller
 
         ####  QUERY OBJECT  ####
         $QueryRequest = new \Nets\QueryRequest(
-          $transactionId
-        ); 
+            $transactionId
+        );
 
         ####  ARRAY WITH QUERY PARAMETERS  ####
-        $InputParametersOfQuery = array
-        (
-          "token"       => $this->token,
-          "merchantId"  => $this->merchantId,
-          "request"     => $QueryRequest 
+        $InputParametersOfQuery = array(
+            "token"       => $this->token,
+            "merchantId"  => $this->merchantId,
+            "request"     => $QueryRequest
         );
 
 
         ####  START QUERY CALL  ####
-        try 
-        {
-          if (strpos($_SERVER["HTTP_HOST"], 'uapp') > 0)
-          {
-          // Creating new client having proxy
-          $client = new \SoapClient($this->wsdl, array('proxy_host' => "isa4", 'proxy_port' => 8080, 'trace' => true,'exceptions' => true));
-          }
-          else
-          {
-          // Creating new client without proxy
-          $client = new \SoapClient($this->wsdl, array('trace' => true,'exceptions' => true ));
-          }
+        try {
+            if (strpos($_SERVER["HTTP_HOST"], 'uapp') > 0) {
+                // Creating new client having proxy
+                $client = new \SoapClient($this->wsdl, array('proxy_host' => "isa4", 'proxy_port' => 8080, 'trace' => true, 'exceptions' => true));
+            } else {
+                // Creating new client without proxy
+                $client = new \SoapClient($this->wsdl, array('trace' => true, 'exceptions' => true));
+            }
 
-          
-          $OutputParametersOfQuery = $client->__call('Query' , array("parameters"=>$InputParametersOfQuery));
-          
-          $QueryResult = $OutputParametersOfQuery->QueryResult; 
-          $order = Order::find(Session::get('orderId'));
-          $order->masked_card_number = $QueryResult->CardInformation->MaskedPAN;
-          $order->card_type = $QueryResult->CardInformation->PaymentMethod;
-          $order->save();
 
-          // $response .= "<h3><font color='gray'>Output parameters:</font></h3>";
-          // $response .= "<pre>"; 
-          // $response .= print_r($OutputParametersOfQuery, true);
-          // $response .= "</pre>";
-          
-          // $response .= "<h3><font color='green'>Query call successfully done.</font></h3>";
-          // $response .= "<h3><a href='index.php'>Test Webshops</a><h3>";
-          // return $response;
-          // redirect('orderbekraftelse/'. $order->token);
-          
+            $OutputParametersOfQuery = $client->__call('Query', array("parameters" => $InputParametersOfQuery));
+
+            $QueryResult = $OutputParametersOfQuery->QueryResult;
+            $order = Order::find(Session::get('orderId'));
+            $order->masked_card_number = $QueryResult->CardInformation->MaskedPAN;
+            $order->card_type = $QueryResult->CardInformation->PaymentMethod;
+            $order->save();
+
+            // $response .= "<h3><font color='gray'>Output parameters:</font></h3>";
+            // $response .= "<pre>"; 
+            // $response .= print_r($OutputParametersOfQuery, true);
+            // $response .= "</pre>";
+
+            // $response .= "<h3><font color='green'>Query call successfully done.</font></h3>";
+            // $response .= "<h3><a href='index.php'>Test Webshops</a><h3>";
+            // return $response;
+            // redirect('orderbekraftelse/'. $order->token);
+
         } // End try
-        catch (\SoapFault $fault) 
-        {
-          ## Do some error handling in here...
+        catch (\SoapFault $fault) {
+            ## Do some error handling in here...
             Session::flash('error_message', 'Error: fel uppstod i betalningsprocessen. Säkerställ att du har angett rätt kortuppgifter och att du har tillräckligt med pengar på kortet. Om du fortfarande inte vet varför betalningen inte går igenom, vänligen kontakta support för hjälp.');
 
             echo "<!DOCTYPE html>";
@@ -897,24 +888,24 @@ class CheckoutController extends Controller
             echo "<script type='text/javascript'>window.parent.location.reload()</script>";
             echo "</head>";
             echo "<body></body></html>";
-          // $response .= "<h3><a href='index.php'>Test Webshops</a><h3>";
+            // $response .= "<h3><a href='index.php'>Test Webshops</a><h3>";
 
-          // $response .= "<br/><font color='red'>EXCEPTION!";   
-          // $response .= "<br/><br/><h3><font color='red'>Query call failed</font></h3>";
-          // $response .= "<pre>"; 
-          // $response .= print_r($fault, true);
-          // $response .= "</pre>";
+            // $response .= "<br/><font color='red'>EXCEPTION!";   
+            // $response .= "<br/><br/><h3><font color='red'>Query call failed</font></h3>";
+            // $response .= "<pre>"; 
+            // $response .= print_r($fault, true);
+            // $response .= "</pre>";
         } // End catch
         ####  END   QUERY CALL  ####
 
     }
 
-    
+
 
     public function saveDeliveryInfo(Request $request)
-    {  
+    {
         // dd($request->all());
-        if(Cart::count() == 0)  {
+        if (Cart::count() == 0) {
             Session::flash('error_message', 'Varukorgen är tom');
             return redirect('varukorg');
         }
@@ -955,12 +946,12 @@ class CheckoutController extends Controller
         $customerEmail = Session::get('orderInfo.email');
         $ssn = Session::get('orderInfo.ssn');
         $customerType = Session::get('orderInfo.isCompany') ? "Business" : "Person";
-        
+
         // if($customerCountry == 'SE') {
-            $this->myOrder->setCountryCode($customerCountry);
-            $this->myOrder->setCurrency("SEK");
-            $currencyMultiplier = 1;
-            $currency = "kr";
+        $this->myOrder->setCountryCode($customerCountry);
+        $this->myOrder->setCurrency("SEK");
+        $currencyMultiplier = 1;
+        $currency = "kr";
         // }
 
         // if($customerCountry == 'FI') {
@@ -982,39 +973,39 @@ class CheckoutController extends Controller
         //     // $currencyMultiplier = 0.928602;
         //     // $currency = "Nkr";
         // }
-        
+
         $this->myOrder->setOrderDate(Carbon::now()->format('Y-m-d'));
-        $this->myOrder->setClientOrderNumber( "order #".Carbon::now()->format('Y-m-d H:i:s')); 
-        
-        if($customerType == "Business") {
+        $this->myOrder->setClientOrderNumber("order #" . Carbon::now()->format('Y-m-d H:i:s'));
+
+        if ($customerType == "Business") {
             $myCustomerInformation = \WebPayItem::companyCustomer();
             $this->is_company = 1;
-            $myCustomerInformation->setCompanyName( $customerFullName);
+            $myCustomerInformation->setCompanyName($customerFullName);
         } else {
-            $myCustomerInformation = \WebPayItem::individualCustomer(); 
+            $myCustomerInformation = \WebPayItem::individualCustomer();
             $this->is_company = 0;
-            
+
             $customerFullName = explode(' ', $customerFullName);
             $customerFirstName = $customerFullName[0];
             $customerLastName = "";
-            for($i = 1; $i < count($customerFullName); $i++ ) {
+            for ($i = 1; $i < count($customerFullName); $i++) {
                 $customerLastName .= $customerFullName[$i] . " ";
             }
             $customerLastName = trim($customerLastName, ' ');
 
-            $myCustomerInformation->setName( $customerFirstName, $customerLastName);
+            $myCustomerInformation->setName($customerFirstName, $customerLastName);
         }
 
-        if($ssn) {
+        if ($ssn) {
             $myCustomerInformation->setNationalIdNumber($ssn);
-            $myCustomerInformation->setPhoneNumber( Session::get('orderInfo.billingPhoneNumber') );
+            $myCustomerInformation->setPhoneNumber(Session::get('orderInfo.billingPhoneNumber'));
         }
 
-        $sveaAddress = \Svea\Helper::splitStreetAddress($customerAddress); 
-        $myCustomerInformation->setStreetAddress( $sveaAddress[0], $sveaAddress[1] );
-        $myCustomerInformation->setZipCode( $customerZipCode )->setLocality( $customerCity );
-        $myCustomerInformation->setEmail( $customerEmail );
-        $this->myOrder->addCustomerDetails( $myCustomerInformation );
+        $sveaAddress = \Svea\Helper::splitStreetAddress($customerAddress);
+        $myCustomerInformation->setStreetAddress($sveaAddress[0], $sveaAddress[1]);
+        $myCustomerInformation->setZipCode($customerZipCode)->setLocality($customerCity);
+        $myCustomerInformation->setEmail($customerEmail);
+        $this->myOrder->addCustomerDetails($myCustomerInformation);
 
         return;
     }
@@ -1022,7 +1013,7 @@ class CheckoutController extends Controller
 
     public function handleOrderItems()
     {
-        Session::put('orderInfo.deliveryMaxTime', 0 );
+        Session::put('orderInfo.deliveryMaxTime', 0);
 
         $tax = 25;
         $this->currencyMultiplier = 1;
@@ -1031,38 +1022,38 @@ class CheckoutController extends Controller
         //     $tax = 0;
         //     $taxMultiplier = 0.8;
         // }
-        
-        if(sizeof(Cart::content()) > 0) {
-            foreach(Cart::content() as $item) {
+
+        if (sizeof(Cart::content()) > 0) {
+            foreach (Cart::content() as $item) {
                 $amount = $item->price * $this->currencyMultiplier * $taxMultiplier;
                 $boughtItem = \WebPayItem::orderRow();
                 // $boughtItem->setAmountExVat( 500.99 );
-                $boughtItem->setAmountIncVat( (float) $amount );
-                $boughtItem->setVatPercent( $tax );
-                $boughtItem->setQuantity( (int) $item->qty );
+                $boughtItem->setAmountIncVat((float) $amount);
+                $boughtItem->setVatPercent($tax);
+                $boughtItem->setQuantity((int) $item->qty);
                 $boughtItem->setDescription($item->name);
                 $boughtItem->setArticleNumber($item->id);
 
 
                 // Add firstBoughtItem to order row
-                $this->myOrder->addOrderRow( $boughtItem );
+                $this->myOrder->addOrderRow($boughtItem);
 
                 $this->ajust[$item->id] = "";
-                if($item->options->et && strpos($item->name, 'Blank') !== false) {
+                if ($item->options->et && strpos($item->name, 'Blank') !== false) {
                     $this->ajust[$item->id] = "Justera till ET: {$item->options->et} <br>";
                 }
 
-                if($item->options->pcd != null) {
+                if ($item->options->pcd != null) {
                     $this->ajust[$item->id] .= "PCD: {$item->options->pcd}";
                 }
 
                 $maxNumber = 0;
-                if($item->model->delivery_time) {
+                if ($item->model->delivery_time) {
                     preg_match_all('!\d+!', $item->model->delivery_time, $number);
                     $maxNumber = max(max($number));
                 }
 
-                if(Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
+                if (Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
                     Session::put('orderInfo.deliveryMaxTime', $maxNumber);
                     Session::put('orderInfo.deliveryTime', $item->model->delivery_time);
                 }
@@ -1073,24 +1064,24 @@ class CheckoutController extends Controller
         $shippingCost = $cartCalculator->totalPriceShipping();
         $shippingFee = \WebPayItem::shippingFee();
         $shippingFee->setVatPercent($tax);
-        $shippingFee->setAmountIncVat((float) ($shippingCost * $this->currencyMultiplier * $taxMultiplier) );
+        $shippingFee->setAmountIncVat((float) ($shippingCost * $this->currencyMultiplier * $taxMultiplier));
         $shippingFee->setName('shippingCost');
-        $this->myOrder->addFee( $shippingFee );
+        $this->myOrder->addFee($shippingFee);
 
-        if(Session::has('campaign.discount')) {
+        if (Session::has('campaign.discount')) {
             $fixedDiscount = \WebPayItem::fixedDiscount();
-            $fixedDiscount->setAmountIncVat(Session::get('campaign.discount') * $this->currencyMultiplier * $taxMultiplier);// optional, Float, use precisely two of the price specification methods
+            $fixedDiscount->setAmountIncVat(Session::get('campaign.discount') * $this->currencyMultiplier * $taxMultiplier); // optional, Float, use precisely two of the price specification methods
             // $fixedDiscount->setAmountExVat(1.0); // optional, Float, recommended, use precisely two of the price specification methods
             $fixedDiscount->setVatPercent($tax); // optional, Integer, recommended, use precisely two of the price specification methods
             $fixedDiscount->setName("FixedDiscount"); // optional, invoice & payment plan orders will merge "name" with "description", String(256) for card and direct
             $fixedDiscount->setDescription("BlackFriday"); // optional, String(40) for invoice & payment plan orders will merge "name" with "description" , String(512) for card and direct
-            $this->myOrder->addDiscount( $fixedDiscount );
+            $this->myOrder->addDiscount($fixedDiscount);
         }
 
-        return;        
+        return;
     }
-    
-  
+
+
 
     public function storeCardPayment(Request $request)
     {
@@ -1104,10 +1095,10 @@ class CheckoutController extends Controller
         $this->handleOrderItems();
 
         // decode the raw response by passing it through the SveaResponse class
-        $myResponse = new \SveaResponse( $rawResponse, $countryCode, $this->myConfig );
+        $myResponse = new \SveaResponse($rawResponse, $countryCode, $this->myConfig);
 
         // dd($myResponse->response, $this->myOrder, Session::get('orderInfo'));
-        if($myResponse->response->accepted) {
+        if ($myResponse->response->accepted) {
             //all is good
             $this->sveaOrderId = $myResponse->response->transactionId;
             $this->paymentType = "Kort";
@@ -1120,7 +1111,7 @@ class CheckoutController extends Controller
             $this->saveOrderDetails();
             Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($this->order, $this->password));
             Mail::to(env('MAIL_FROM_ADDRESS'))->send(new OrderConfirmationCC($this->order, $this->password));
-            return redirect("orderbekraftelse/".Session::get('orderInfo.token'));
+            return redirect("orderbekraftelse/" . Session::get('orderInfo.token'));
         }
 
         // Storage::append('svea.log', 
@@ -1130,7 +1121,7 @@ class CheckoutController extends Controller
         //     ". \nOrderInfo: ". json_encode($this->myOrder)
         // );
 
-        session()->flash('error_message', "Betalningen gick inte igenom. Var snäll och försök igen eller kontakta ".App\Setting::getSupportMail());
+        session()->flash('error_message', "Betalningen gick inte igenom. Var snäll och försök igen eller kontakta " . App\Setting::getSupportMail());
 
         // session()->flash('myResponse', $myResponse->response);
         // session()->flash('myOrder', $this->myOrder);
@@ -1141,18 +1132,18 @@ class CheckoutController extends Controller
 
     public function invoicePayment()
     {
-        if(Cart::count() == 0)  {
+        if (Cart::count() == 0) {
             Session::flash('error_message', 'Varukorgen är tom');
             return redirect('varukorg');
         }
 
         $customerCountry = Session::get('orderInfo.billingCountry');
-        
+
         // if($customerCountry == 'SE') {
-            $this->myOrder->setCountryCode($customerCountry);
-            $this->myOrder->setCurrency("SEK");
-            $currencyMultiplier = 1;
-            $currency = "kr";
+        $this->myOrder->setCountryCode($customerCountry);
+        $this->myOrder->setCurrency("SEK");
+        $currencyMultiplier = 1;
+        $currency = "kr";
         // }
 
         // if($customerCountry == 'FI') {
@@ -1176,9 +1167,8 @@ class CheckoutController extends Controller
         // }
 
         $cartCalculator = new CartCalculator;
-       
-        return view('checkout.invoice_payment', compact('cartCalculator', 'currencyMultiplier', 'currency')); 
-        
+
+        return view('checkout.invoice_payment', compact('cartCalculator', 'currencyMultiplier', 'currency'));
     }
 
     public function storeInvoicePayment(Request $request)
@@ -1186,7 +1176,7 @@ class CheckoutController extends Controller
         // $requestAddress = \WebPay::getAddresses($this->myConfig)
         //     ->setCountryCode(Session::get('orderInfo.billingCountry'))
         //     ->setCustomerIdentifier(Session::get('orderInfo.ssn')); 
-            // ->setCustomerIdentifier($request->ssn); 
+        // ->setCustomerIdentifier($request->ssn); 
 
         // $responseAddress = $requestAddress->getIndividualAddresses()->doRequest();
 
@@ -1213,7 +1203,7 @@ class CheckoutController extends Controller
         // dd($requestPayment, $responsePayment);
 
 
-        if($responsePayment->accepted) {
+        if ($responsePayment->accepted) {
             //all is good
             $person = $responsePayment->customerIdentity;
             // $nameArr = explode(' ', $person->fullName);
@@ -1240,14 +1230,15 @@ class CheckoutController extends Controller
             // $order = Order::find($this->orderID);
             Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($this->order, $this->password));
             Mail::to(env('MAIL_FROM_ADDRESS'))->send(new OrderConfirmationCC($this->order, $this->password));
-            return redirect("orderbekraftelse/".Session::get('orderInfo.token'));
+            return redirect("orderbekraftelse/" . Session::get('orderInfo.token'));
         }
 
-        Storage::append('svea.log', 
-            '['.Carbon::now().'] Errorkod: '. $responsePayment->resultcode .
-            ". OrderType: ". $this->myOrder->orderType.', Accepted: '.json_encode($responsePayment->accepted).', sveaWillBuyOrder: '.json_encode($responsePayment->sveaWillBuyOrder).
-            ". \nMessage: ". $responsePayment->errormessage. 
-            ". \nUserInfo: ". json_encode($this->myOrder->customerIdentity)
+        Storage::append(
+            'svea.log',
+            '[' . Carbon::now() . '] Errorkod: ' . $responsePayment->resultcode .
+                ". OrderType: " . $this->myOrder->orderType . ', Accepted: ' . json_encode($responsePayment->accepted) . ', sveaWillBuyOrder: ' . json_encode($responsePayment->sveaWillBuyOrder) .
+                ". \nMessage: " . $responsePayment->errormessage .
+                ". \nUserInfo: " . json_encode($this->myOrder->customerIdentity)
         );
 
         // if($responsePayment->resultcode == 40002) {
@@ -1299,7 +1290,7 @@ class CheckoutController extends Controller
     //     $this->saveOrderDetails();
     //     $this->saveCarData();
     //     // $order = Order::find($this->orderID);
-        // Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($this->order, $this->password));
+    // Mail::to(Session::get('orderInfo.email'))->send(new OrderConfirmation($this->order, $this->password));
     //     return redirect("orderbekraftelse/".Session::get('orderInfo.token'));
     // }
 
@@ -1307,20 +1298,20 @@ class CheckoutController extends Controller
     public function createOrder(Request $request)
     {
         // dd($request->all());
-        if(Cart::count() == 0)  {
+        if (Cart::count() == 0) {
             Session::flash('error_message', 'Varukorgen är tom');
             return redirect('varukorg');
         }
 
-        if(Session::get('orderInfo.regNumber') == null)  {
+        if (Session::get('orderInfo.regNumber') == null) {
             return redirect('varukorg');
         }
 
         $cartCalculator = new CartCalculator;
-        Session::put('orderInfo.deliveryMaxTime', 0 );
+        Session::put('orderInfo.deliveryMaxTime', 0);
 
-        foreach(Cart::content() as $item) {
-            
+        foreach (Cart::content() as $item) {
+
             // Funkar inte helt med klarna och fraktkostnader. Fixas senare med annan kund
             // $unit_price_with_moms = ((int) $item->price + ($shippingCost/ (int) $item->qty) ) * 100;
             $cart[] = [
@@ -1336,17 +1327,17 @@ class CheckoutController extends Controller
             ];
 
             $this->ajust[$item->id] = "";
-            if($item->options->pcd != null) {
+            if ($item->options->pcd != null) {
                 $this->ajust[$item->id] = $item->options->pcd;
             }
 
             $maxNumber = 0;
-            if($item->model->delivery_time) {
+            if ($item->model->delivery_time) {
                 preg_match_all('!\d+!', $item->model->delivery_time, $number);
                 $maxNumber = max(max($number));
             }
 
-            if(Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
+            if (Session::get('orderInfo.deliveryMaxTime') < $maxNumber) {
                 Session::put('orderInfo.deliveryMaxTime', $maxNumber);
                 Session::put('orderInfo.deliveryTime', $item->model->delivery_time);
             }
@@ -1368,14 +1359,14 @@ class CheckoutController extends Controller
 
         $customerType = "Person";
 
-        if(Session::has('orderInfo.isCompany')) {
-            if(Session::get('orderInfo.isCompany') == 1) {
+        if (Session::has('orderInfo.isCompany')) {
+            if (Session::get('orderInfo.isCompany') == 1) {
                 $customerType = "Business";
             }
         }
 
-        if(isset($request->isCompanyCheck)) {
-            if($request->isCompanyCheck == 1) {
+        if (isset($request->isCompanyCheck)) {
+            if ($request->isCompanyCheck == 1) {
                 $customerType = "Business";
             }
         }
@@ -1400,8 +1391,8 @@ class CheckoutController extends Controller
         $this->order['shipping_address']['city'] = $request->billingCity;
         $this->order['shipping_address']['country'] = $request->billingCountry;
 
-        if(isset($request->isOrderShippingAddress)) {
-            $firstName = strtok($request->fullName, " "); 
+        if (isset($request->isOrderShippingAddress)) {
+            $firstName = strtok($request->fullName, " ");
             $lastName = trim($request->fullName, $firstName);
             $this->order['shipping_address']['given_name'] = $firstName;
             $this->order['shipping_address']['family_name'] = $lastName;
@@ -1413,7 +1404,7 @@ class CheckoutController extends Controller
             $this->order['shipping_address']['country'] = $request->shippingCountry;
         }
 
-        $request->session()->put('orderInfo.token', bin2hex(openssl_random_pseudo_bytes(16)) );
+        $request->session()->put('orderInfo.token', bin2hex(openssl_random_pseudo_bytes(16)));
 
         $this->saveUser();
         $this->saveOrder();
@@ -1422,17 +1413,20 @@ class CheckoutController extends Controller
 
         Mail::to($this->order['billing_address']['email'])->send(new OrderConfirmation($this->createdOrder, $this->password));
 
-      
-        return redirect("orderbekraftelse/".Session::get('orderInfo.token'));
+
+        return redirect("orderbekraftelse/" . Session::get('orderInfo.token'));
     }
+
+
+
 
     public function confirmOrder($token)
     {
         $order = Order::where('token', $token)->first();
         $orderDetails = OrderDetail::where('order_id', $order->id)->get();
         // dd($order, $orderDetails);
-        if(sizeof($order) <= 0) {
-            session()->flash('error_message', "Finns ingen order att bekräfta. Var snäll och beställ igen eller kontakta ".App\Setting::getSupportMail());
+        if (isset($order) <= 0) {
+            session()->flash('error_message', "Finns ingen order att bekräfta. Var snäll och beställ igen eller kontakta " . App\Setting::getSupportMail());
             return redirect('varukorg');
         }
 
@@ -1444,7 +1438,7 @@ class CheckoutController extends Controller
         unset($cookie['addMount']);
         unset($cookie['addTPMS']);
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
         Cart::destroy();
 
         Session::forget('orderInfo');
@@ -1454,10 +1448,11 @@ class CheckoutController extends Controller
     }
 
     private function saveUser()
-    {        
-        $updateUser = User::where('email', Session::get('orderInfo.email') )->first();
+    {
+        $temp = "alihaider123go@gmail.com";
+        $updateUser = User::where('email', Session::get('orderInfo.email'))->first();
 
-        if(sizeOf($updateUser) > 0) {
+        if (isset($updateUser)) {
             $updateUser->org_number = Session::get('orderInfo.ssn') === null ?: Session::get('orderInfo.ssn');
             $updateUser->billing_full_name = Session::get('orderInfo.billingFullName');
             $updateUser->billing_phone = Session::get('orderInfo.billingPhoneNumber');
@@ -1473,8 +1468,8 @@ class CheckoutController extends Controller
             $updateUser->shipping_city = Session::get('orderInfo.shippingCity');
             $updateUser->shipping_country = Session::get('orderInfo.shippingCountry');
             // $updateUser->shipping_country = 'SE';
-            $updateUser->save();
 
+            $updateUser->save();
             $this->userID = $updateUser->id;
             return;
         }
@@ -1515,10 +1510,16 @@ class CheckoutController extends Controller
     private function saveOrder()
     {
         // dd($this->myOrder);
+        $createOrder = Order::find(Session::get('orderId'));
+
+        if (!isset($createOrder)) {
+            $createOrder = new Order;
+        }
+
         $cartCalculator = new CartCalculator;
         $cartCalculator->setCurrency();
 
-        $createOrder = new Order;
+
         $createOrder->user_id = $this->userID;
         $createOrder->ip_number = Session::get('orderInfo.ipNumber');
         // $createOrder->svea_order_id = $this->sveaOrderId;
@@ -1531,8 +1532,8 @@ class CheckoutController extends Controller
         $createOrder->delivery_method_id = Session::has('orderInfo.deliveryId') ? Session::get('orderInfo.deliveryId') : 1;
         // $createOrder->payment_method_id = Session::get('orderInfo.paymentId');
         $createOrder->payment_method_id = 0;
-        $createOrder->shipping_fee = $cartCalculator->totalPriceShipping();//round($this->shippingFee, 2);
-        $createOrder->total_price_excluding_tax = $cartCalculator->totalPriceExTax();//round(($price * 0.8), 2);
+        $createOrder->shipping_fee = $cartCalculator->totalPriceShipping(); //round($this->shippingFee, 2);
+        $createOrder->total_price_excluding_tax = $cartCalculator->totalPriceExTax(); //round(($price * 0.8), 2);
         $createOrder->total_price_including_tax = $cartCalculator->totalPriceIncTax(); //round($price, 2);
         $createOrder->total_tax_amount = $cartCalculator->totalTax(); //round(($price * 0.2), 2);
         $createOrder->discount =  Session::get('campaign.discount') * $this->currencyMultiplier;
@@ -1560,8 +1561,8 @@ class CheckoutController extends Controller
 
         $dt = Carbon::now();
         $dt->subWeek();
-        $adTracking = AdTracking::where('ip_number', $createOrder->ip_number)->where('created_at','>=', $dt)->first();
-        $createOrder->is_affiliate_customer = sizeOf($adTracking) > 0 ? 1 : 0;
+        $adTracking = AdTracking::where('ip_number', $createOrder->ip_number)->where('created_at', '>=', $dt)->first();
+        $createOrder->is_affiliate_customer = isset($adTracking) > 0 ? 1 : 0;
         $createOrder->token = Session::get('orderInfo.token');
         $createOrder->save();
         $this->orderID = DB::getPdo()->lastInsertId();
@@ -1589,10 +1590,10 @@ class CheckoutController extends Controller
         $gotCompleteTires = false;
 
         $this->ajust = Session::has('orderInfo.ajust') ? Session::get('orderInfo.ajust') : '';
-        
-        if(sizeof(Cart::content()) > 0) {
-            foreach(Cart::content() as $item) {
-                if(!isset($item->id))
+
+        if (sizeof(Cart::content()) > 0) {
+            foreach (Cart::content() as $item) {
+                if (!isset($item->id))
                     continue;
 
                 $amount = $item->price * $currencyMultiplier * $taxMultiplier;
@@ -1613,21 +1614,21 @@ class CheckoutController extends Controller
                 $createOrderDetails->total_tax_amount = $amount * $item->qty * 0.2 * $currencyMultiplier;
                 $createOrderDetails->tax = $item->vatPercent * $currencyMultiplier;
                 $createOrderDetails->currency = 'SEK';
-                $createOrderDetails->ajust = isset($this->ajust[$product->id]) ? $this->ajust[$product->id]: null;
+                $createOrderDetails->ajust = isset($this->ajust[$product->id]) ? $this->ajust[$product->id] : null;
                 $createOrderDetails->save();
 
-                if($product->product_category_id <= 2 && $product->quantity > 0) {
+                if ($product->product_category_id <= 2 && $product->quantity > 0) {
                     $product->quantity = $product->quantity - $item->qty;
                     $product->save();
                 }
 
                 // For AdTracktion
-                if($item->options->product_category_id == 2) {
+                if ($item->options->product_category_id == 2) {
                     // $gotRims = true;
                     $rimQty += $item->qty;
                 }
 
-                if($item->options->product_category_id == 1) {
+                if ($item->options->product_category_id == 1) {
                     // $gotTires = true;
                     $tireQty += $item->qty;
                 }
@@ -1638,13 +1639,13 @@ class CheckoutController extends Controller
                 // if($item->options->product_category_id == 1 && $item->qty >= 4)
                 //     $gotCompleteTires = true;
             }
-        } 
+        }
 
         $cookie = json_decode(Cookie::get('cookie'), true);
         $cookie['adTracktion']['rimQty'] = $rimQty;
         $cookie['adTracktion']['tireQty'] = $tireQty;
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
 
         return;
     }
@@ -1654,7 +1655,7 @@ class CheckoutController extends Controller
         $carSearch = json_decode(Cookie::get('carSearch'), true);
         $searchData = $carSearch['searchData'];
 
-        if( empty($carSearch['searchData']) ) {
+        if (empty($carSearch['searchData'])) {
             $createCarData = new CarData;
             $createCarData->order_id = Session::get('orderId');
             $createCarData->reg_number = Session::get('orderInfo.regNumber');
@@ -1665,7 +1666,7 @@ class CheckoutController extends Controller
         $createCarData = new CarData;
         $createCarData->order_id = Session::get('orderId');
         $createCarData->reg_number = $searchData['RegNumber'];
-        $createCarData->car_model = $searchData['Manufacturer']. " " . $searchData['ModelName'] . " " . $searchData['FoundYear'];
+        $createCarData->car_model = $searchData['Manufacturer'] . " " . $searchData['ModelName'] . " " . $searchData['FoundYear'];
         $createCarData->front_tire = $searchData['FoundDackFront'];
         $createCarData->pcd = $searchData['PCD'];
         $createCarData->offset = $searchData['Offset'];
@@ -1675,7 +1676,7 @@ class CheckoutController extends Controller
 
         return;
     }
-    
+
 
     public function pushOrder()
     {
@@ -1683,38 +1684,41 @@ class CheckoutController extends Controller
         $password = env('API_SEARCH_PASS');
 
         $headers[] = 'Authorization: Basic ' .
-        base64_encode($username.':'.$password);
+            base64_encode($username . ':' . $password);
         $headers[] = 'Content-Type: application/json';
 
-        $orders = Order::whereIn('order_status_id', [1,2,4])->where('is_pushed', 0)->get();
+        $orders = Order::whereIn('order_status_id', [1, 2, 4])->where('is_pushed', 0)->get();
 
         // $order = Order::find(49);
 
         foreach ($orders as $order) {
 
             $different_shipping = 1;
-            if( $order->billing_full_name == $order->shipping_full_name && 
+            if (
+                $order->billing_full_name == $order->shipping_full_name &&
                 $order->billing_phone == $order->shipping_phone &&
                 $order->billing_street_address == $order->shipping_street_address &&
                 $order->billing_postal_code == $order->shipping_postal_code &&
                 $order->billing_city == $order->shipping_city &&
                 $order->billing_country == $order->shipping_country
-            ) { $different_shipping = 0; }
+            ) {
+                $different_shipping = 0;
+            }
 
             $items = [];
             foreach ($order->orderDetails as $item) {
                 $itemType = '';
 
-                if($item->product->product_category_id == 1)
+                if ($item->product->product_category_id == 1)
                     $itemType = 'dack';
 
-                if($item->product->product_category_id == 2)
+                if ($item->product->product_category_id == 2)
                     $itemType = 'falgar';
 
-                if($item->product->product_category_id == 3 && $item->product->product_type_id != 15) 
+                if ($item->product->product_category_id == 3 && $item->product->product_type_id != 15)
                     $itemType = 'tilbehor';
 
-                if($item->product->product_type_id == 15) 
+                if ($item->product->product_type_id == 15)
                     $itemType = 'MB';
 
                 $items[] = [
@@ -1726,7 +1730,7 @@ class CheckoutController extends Controller
             }
 
             // dd($items);
-            
+
             $deliveryType = 5;
             // if($order->delivery_method_id == 2) {
             //     $deliveryType = 1;
@@ -1773,22 +1777,24 @@ class CheckoutController extends Controller
             $host = "https://slimapi.abswheels.se/createOrder/";
             $apiResponse = $this->CallAPIHeader("POST", $headers, $host, $data);
             $response = json_decode($apiResponse, true);
-            
-            if($response['status'] == 'Ok') {
+
+            if ($response['status'] == 'Ok') {
                 $order->is_pushed = 1;
                 $order->abs_order_id = $response['data']['OrderID'];
                 $order->save();
-                Storage::append('pushOrder.log', 
-                    '['.Carbon::now().'] OrderID: '. $order->id .
-                    "\nSuccess response: ". json_encode($response).
-                    "\nSent data: ". json_encode($data)
+                Storage::append(
+                    'pushOrder.log',
+                    '[' . Carbon::now() . '] OrderID: ' . $order->id .
+                        "\nSuccess response: " . json_encode($response) .
+                        "\nSent data: " . json_encode($data)
                 );
 
                 // dd($response, $data);
             } else {
-                Storage::append('pushOrder.log', 
-                    '['.Carbon::now().'] OrderID: '. $order->id .
-                    '. ErrorMessage: '. $response['ErrorMessage']
+                Storage::append(
+                    'pushOrder.log',
+                    '[' . Carbon::now() . '] OrderID: ' . $order->id .
+                        '. ErrorMessage: ' . $response['ErrorMessage']
                 );
             }
             // $status = $response['status'] == 'Ok' ? true : false;
@@ -1797,20 +1803,20 @@ class CheckoutController extends Controller
         // dd($data);
     }
 
-     public function getAddress(Request $request)
+    public function getAddress(Request $request)
     {
         // dd($request->all());
         // $service_url = "url";
         // $JSONResponse = file_get_contents($service_url);
         // $customerInfo = json_decode($JSONResponse, true);
-        
+
 
         //Noteringar: Förhindra Enter-knapp, Fixa meddelande ruta om fel info fylldes in.
 
         $username = 'ptest';
         $password = 'ptest';
         $headers[] = 'Authorization: Basic ' .
-        base64_encode($username.':'.$password);
+            base64_encode($username . ':' . $password);
         $headers[] = 'Content-Type: application/json';
         $host = "https://slimapi.abswheels.se/getUserDetail/$request->ssn/";
         $apiResponse = $this->CallAPIHeader("GET", $headers, $host);
@@ -1820,9 +1826,9 @@ class CheckoutController extends Controller
         $message = false;
         $customerInfoList = [];
 
-        if(isset($apiResponse) ) {
+        if (isset($apiResponse)) {
 
-            if($apiResponse->status == "Ok") {
+            if ($apiResponse->status == "Ok") {
                 foreach ($apiResponse->data as $customerData) {
                     $customerInfoList[] = [
                         'firstName' => $customerData->FirstName,
@@ -1838,12 +1844,11 @@ class CheckoutController extends Controller
             } else {
                 $message = $apiResponse->ErrorMessage;
             }
-
         }
 
-        
 
-        if(!empty($customerInfoList)) {
+
+        if (!empty($customerInfoList)) {
             $customerInfo = end($customerInfoList);
         } else {
             $customerInfo = [
@@ -1868,7 +1873,6 @@ class CheckoutController extends Controller
             'customerInfo' => $customerInfo,
             'message' => $message,
         ];
-
     }
 
     public function getAlternativeAddress(Request $request)
@@ -1878,7 +1882,7 @@ class CheckoutController extends Controller
         // $JSONResponse = file_get_contents($service_url);
         // $companyInfo = json_decode($JSONResponse, true);
 
-        if(isset($request->alternativeAddressId) && Session::has('customerListInfo')) {
+        if (isset($request->alternativeAddressId) && Session::has('customerListInfo')) {
             $addressInfo = Session::get('customerListInfo')[$request->alternativeAddressId];
         } else {
             $addressInfo = end($customerInfoList);
@@ -1893,15 +1897,14 @@ class CheckoutController extends Controller
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        switch ($method)
-        {   
+        switch ($method) {
             case "POST":
                 curl_setopt($curl, CURLOPT_POST, 1);
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
                 break;
 
             case "PUT":
-                curl_setopt($curl,CURLOPT_PUT, 1);
+                curl_setopt($curl, CURLOPT_PUT, 1);
                 break;
 
             default:
@@ -1915,5 +1918,93 @@ class CheckoutController extends Controller
         curl_close($curl);
 
         return $result;
+    }
+
+    //////////////////////////// Klarna Integration 
+
+    public function klarnaPayment(Request $request)
+    {
+        $order_amount = 0;
+        $order_tax_amount = 0;
+        foreach (Cart::content() as $item) {
+            $cart[] = [
+                "type" => "physical",
+                "reference" => "123050",
+                'name' => $item->name,
+                'quantity' => (int) $item->qty,
+                "quantity_unit" => "kg",
+                'unit_price' => (int) $item->price * 100,
+                "tax_rate" => 2500,
+                "total_amount" => (int) $item->price * (int) $item->qty * 100,
+                "total_tax_amount" => (int) $item->price * (int) $item->qty * 20
+            ];
+            $order_amount = $order_amount + (int) $item->price * (int) $item->qty * 100;
+            $order_tax_amount = $order_tax_amount + (int) $item->price * (int) $item->qty * 20;
+        }
+        $data = [
+            "purchase_country" => "gb",
+            "purchase_currency" => "gbp",
+            "locale" => "en-gb",
+            "order_amount" => $order_amount,
+            "order_tax_amount" => $order_tax_amount,
+            "order_lines" => $cart,
+            "merchant_urls" => [
+                "terms" => "https://www.example.com/terms.html",
+                "cancellation_terms" => "https://www.example.com/terms/cancellation.html",
+                "checkout" => "https://www.example.com/checkout.html",
+                "confirmation" => url('klarna_confirmation'),
+                "push" => "https://www.example.com/api/push",
+            ]
+        ];
+
+        $data = json_encode($data);
+        $username = config("hjulonline.klarna_merchant_id");
+        $password = config("hjulonline.klarna_shared_secret");
+        $headers[] = 'Authorization: Basic ' . base64_encode($username . ':' . $password);
+
+        $headers[] = 'Content-Type: application/json';
+
+        $host = config("hjulonline.klarna_host") . "/checkout/v3/orders";
+
+        $apiResponse = $this->CallAPIHeader("POST", $headers, $host, $data);
+        $response = json_decode($apiResponse);
+
+        Session::put('klarna_order_id', $response->order_id);
+        return [
+            'netsPaymentForm' => $response->html_snippet,
+            'isAdmin' => false,
+            'isValidOrder' => true
+        ];
+    }
+
+    public function klarnaConfirmation()
+    {
+        $order_id = Session::get('klarna_order_id');
+        $username = config("hjulonline.klarna_merchant_id");
+        $password = config("hjulonline.klarna_shared_secret");
+        $headers[] = 'Authorization: Basic ' . base64_encode($username . ':' . $password);
+        $headers[] = 'Content-Type: application/json';
+        $host = config("hjulonline.klarna_host") . "/checkout/v3/orders/" . $order_id;
+        $apiResponse = $this->CallAPIHeader("Get", $headers, $host);
+        $response = json_decode($apiResponse);
+
+        $this->paymentType = "Klarna";
+        $this->orderStatusId = 1;
+        $this->saveUser();
+        $order = $this->saveOrder();
+        // $order = Order::find(Session::get('orderId'));
+        $order->klarna_status = $response->status;
+        $order->total_price_including_tax = 0;
+        $order->total_tax_amount = 0;
+        foreach ($order->orderDetails as $item) {
+            $order->total_price_excluding_tax += $item->total_price_excluding_tax;
+            $order->total_price_including_tax += $item->total_price_including_tax;
+            $order->total_tax_amount += $item->total_tax_amount;
+        }
+        $order->save();
+        $this->saveOrderDetails();
+        $this->saveCarData();
+        $snippet = $response->html_snippet;
+        return redirect("orderbekraftelse/" . Session::get('orderInfo.token'));
     }
 }

@@ -27,13 +27,12 @@
 // 	Redis::publish('Channel', json_encode(['foo' => 'bar']));
 // });
 
-Route::group(['middleware' => ['cachebefore', 'cacheafter']], function () {
-});
+Route::group(['middleware' => ['cachebefore', 'cacheafter']], function () { });
 
 // Route::get('/full-backup', 'CronJobController@fullBackup');
 
 Route::get('/', 'PagesController@index');
-Route::get('/kvitto', function() {
+Route::get('/kvitto', function () {
 	$order = App\Order::find(5);
 	return view('email.recite', compact('order'));
 });
@@ -127,7 +126,7 @@ Route::get('losenord/aterstall/{token}', 'Auth\ResetPasswordController@showReset
 Route::group(['middleware' => ['auth', 'admin']], function () {
 	// Route::get('/testing',function(){
 	// 	// return view('testing');
-		// return Carbon\Carbon::today()->format('Y-m-d');
+	// return Carbon\Carbon::today()->format('Y-m-d');
 	// });
 });
 
@@ -135,7 +134,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 Route::get('pushOrder', 'CheckoutController@pushOrder');
 
 
-Route::get('testing', function() {
+Route::get('testing', function () {
 	Cart::destroy();
 	Cache::flush();
 	Session::flush();
@@ -157,7 +156,7 @@ Route::get('testing', function() {
 	// // 
 	// $x = true and false;
 	// 
-	
+
 	// $array = [1, 2, 3, 5, 7];
 	// $diff = 1; 
 	// foreach($array as $key => $value) { 
@@ -167,9 +166,9 @@ Route::get('testing', function() {
 	// 	} 
 	// }; 
 	// return $missingNumbers;
-	
 
-	
+
+
 	//echo str_replace(["/", "\\"], ['-', '-'], 'brons\silver');
 	// header('Content-Type: text/plain');
 	// $curl = curl_init();
@@ -183,20 +182,20 @@ Route::get('testing', function() {
 	// curl_setopt($curl, CURLINFO_HEADER_OUT, 1);
 	// curl_setopt($curl, CURLOPT_POSTFIELDS, [
 	// 	'accepturl' => url('/storeCardPayment'),
- //        'amount' => 1000,
- //        'billingAddress' => Session::get('orderInfo.billingAddress'),
- //        'billingFirstName' => Session::get('orderInfo.billingFirstName'),
- //        'billingLastName' => Session::get('orderInfo.billingLastName'),
- //        'billingPostalCode' => Session::get('orderInfo.billingPostalCode'),
- //        'billingPostalPlace' => Session::get('orderInfo.billingCity'),
- //        'cancelurl' => url('/kortbetalning'),
- //        'currency' => 'SEK',
- //        'email' => Session::get('orderInfo.email'),
- //        'lang' => 'en',
- //        'merchant' => '90222319',
- //        'orderid' => '15',
- //        'paytype' => 'VISA,MC',
- //        'test' => 1,
+	//        'amount' => 1000,
+	//        'billingAddress' => Session::get('orderInfo.billingAddress'),
+	//        'billingFirstName' => Session::get('orderInfo.billingFirstName'),
+	//        'billingLastName' => Session::get('orderInfo.billingLastName'),
+	//        'billingPostalCode' => Session::get('orderInfo.billingPostalCode'),
+	//        'billingPostalPlace' => Session::get('orderInfo.billingCity'),
+	//        'cancelurl' => url('/kortbetalning'),
+	//        'currency' => 'SEK',
+	//        'email' => Session::get('orderInfo.email'),
+	//        'lang' => 'en',
+	//        'merchant' => '90222319',
+	//        'orderid' => '15',
+	//        'paytype' => 'VISA,MC',
+	//        'test' => 1,
 	// ]);
 	// curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 	// curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -217,13 +216,13 @@ Route::get('testing', function() {
 	// return url_exists($url) ? "Exists" : 'Not Exists';
 	// $product = "86T";
 	// $loadIndex = substr($product, 0, -1);
- //    $speedIndex = substr($product, -1);
- //    dd($loadIndex , $speedIndex);
+	//    $speedIndex = substr($product, -1);
+	//    dd($loadIndex , $speedIndex);
 	// return Session::getId();
 	// $directory = public_path('images/product/media/rims');
- //    $images = File::allFiles($directory);
+	//    $images = File::allFiles($directory);
 
- //    dd($directory, $images);
+	//    dd($directory, $images);
 
 	// $value = "Albert von Fontän";
 	// $Firstname = strtok($value, " "); 
@@ -284,7 +283,7 @@ Route::get('testing', function() {
 
 //     // dd($products);
 
-	
+
 //     // return $price;
 // });
 
@@ -311,7 +310,7 @@ Route::get('testing', function() {
 //     $fileName = time().'.'.$fileName;
 //     $save = file_put_contents('images/product/' . $fileName, $file);
 //     if($save) {
-    	
+
 //     	DB::beginTransaction();
 //     	try{
 //     		// save in DB product_images
@@ -381,6 +380,8 @@ Route::post('/createOrder', 'CheckoutController@createOrder');
 // Route::get('/orderbekraftelse', 'CheckoutController@confirmOrder');
 Route::get('/cardPaymentCreateOrder', 'CheckoutController@cardPaymentCreateOrder');
 Route::post('/kortbetalning', 'CheckoutController@cardPayment');
+
+
 Route::get('/kortbetalning', 'CheckoutController@cardPayment');
 Route::get('/avarda_payment', 'CheckoutController@avardaPaymentInitialize');
 Route::get('/avarda_callback', 'CheckoutController@avardaCallback');
@@ -389,6 +390,24 @@ Route::get('/careditcard_payment', 'CheckoutController@getNetsHTML');
 Route::get('/faktura', 'CheckoutController@invoicePayment');
 Route::get('/delbetala', 'CheckoutController@partPayment');
 Route::get('/betala_butik', 'CheckoutController@inStorePayment');
+
+
+
+
+//klarna routes
+
+Route::get('/klarna_payment', 'CheckoutController@klarnaPayment');
+Route::get('/klarna_confirmation', 'CheckoutController@klarnaConfirmation');
+
+Route::get('/klarna_callback', 'CheckoutController@klarnaCallback');
+Route::get('/klarna_success', 'CheckoutController@klarnaSuccess');
+
+
+
+
+
+
+
 
 // Route::post('/showDibsCardPayment', 'CheckoutController@showDibsCardPayment');
 Route::get('/storeCardPayment', 'CheckoutController@storeCardPayment');
@@ -530,12 +549,12 @@ Route::group(['prefix' => 'admin'], function () {
 
 		Route::patch('updateQuantity', 'AdminOrdersController@updateQuantity');
 		Route::patch('updateStatus', 'AdminOrdersController@updateStatus');
-		
+
 		Route::post('activateKlarna', 'AdminOrdersController@activateKlarna');
 		Route::post('cancelKlarna', 'AdminOrdersController@cancelKlarna');
 
-        Route::get('purchaseAvarda/{id}/{purchaseid}', 'CheckoutController@purchaseAvardaPayment');
-		
+		Route::get('purchaseAvarda/{id}/{purchaseid}', 'CheckoutController@purchaseAvardaPayment');
+
 		Route::get('filterOrders', 'AdminOrdersController@filterOrders');
 
 		Route::get('dack', 'AdminProductsController@tires');
@@ -564,14 +583,14 @@ Route::group(['prefix' => 'admin'], function () {
 		Route::post('updateAccessory', 'AdminProductsController@updateAccessory');
 		Route::get('filterAccessories', 'AdminProductsController@filterAccessories');
 
-		
+
 
 		Route::get('priser/sommardack', 'AdminProfitController@summerTires');
 		Route::patch('priser/sommardack', 'AdminProfitController@updateSummerTires');
-		
+
 		Route::get('priser/vinterdack', 'AdminProfitController@winterTires');
 		Route::patch('priser/vinterdack', 'AdminProfitController@updateWinterTires');
-		
+
 		Route::get('priser/falgar', 'AdminProfitController@rims');
 		Route::patch('priser/falgar', 'AdminProfitController@updateRims');
 
@@ -585,9 +604,9 @@ Route::group(['prefix' => 'admin'], function () {
 		Route::post('updateUser', 'AdminUsersController@updateUser');
 		Route::patch('updateUserType', 'AdminUsersController@updateUserType');
 		Route::get('filterUsers', 'AdminUsersController@filterUsers');
-		
+
 		Route::get('loginUser/{id}', 'AdminUsersController@loginUser');
-		
+
 		Route::get('sokningar', 'AdminCustomerSearchesController@index');
 		Route::get('filterCustomerSearches', 'AdminCustomerSearchesController@filterCustomerSearches');
 		Route::get('exportCustomerSearches', 'AdminCustomerSearchesController@filterCustomerSearches');
@@ -596,7 +615,7 @@ Route::group(['prefix' => 'admin'], function () {
 		Route::get('bilder/dack', 'AdminImagesController@tires');
 		Route::post('bilder/uploadMediaTires', 'AdminImagesController@uploadTires');
 		Route::delete('bilder/dack/{tire}', 'AdminImagesController@deleteTire');
-		
+
 		Route::get('bilder/falgar', 'AdminImagesController@rims');
 		Route::post('bilder/uploadMediaRims', 'AdminImagesController@uploadRims');
 		Route::delete('bilder/falgar/{rim}', 'AdminImagesController@deleteRim');
@@ -622,16 +641,15 @@ Route::group(['prefix' => 'admin'], function () {
 		Route::delete('cms/sliderImage/{id}', 'AdminCMSController@destroySliderImage');
 		Route::post('cms/sortSlider', 'AdminCMSController@sortSlider');
 
-	    Route::get('/laravel-filemanager', '\Unisharp\Laravelfilemanager\controllers\LfmController@show');
-	    Route::post('/laravel-filemanager/upload', '\Unisharp\Laravelfilemanager\controllers\LfmController@upload');
-	    
-	    Route::get('cms/installningar/allmant/{settings_type}', 'AdminCMSController@settingList');
-	    Route::get('cms/installningar/foretags_info/{settings_type}', 'AdminCMSController@settingList');
-	    Route::get('cms/installningar/sociala_medier/{settings_type}', 'AdminCMSController@settingList');
-	    Route::post('cms/updateSettings', 'AdminCMSController@updateSettings');
+		Route::get('/laravel-filemanager', '\Unisharp\Laravelfilemanager\controllers\LfmController@show');
+		Route::post('/laravel-filemanager/upload', '\Unisharp\Laravelfilemanager\controllers\LfmController@upload');
 
+		Route::get('cms/installningar/allmant/{settings_type}', 'AdminCMSController@settingList');
+		Route::get('cms/installningar/foretags_info/{settings_type}', 'AdminCMSController@settingList');
+		Route::get('cms/installningar/sociala_medier/{settings_type}', 'AdminCMSController@settingList');
+		Route::post('cms/updateSettings', 'AdminCMSController@updateSettings');
 	});
-	
+
 	Route::group(['middleware' => 'guest'], function () {
 		Route::get('77889', 'Auth\LoginController@getAdminLogin');
 		Route::post('77889', 'Auth\LoginController@postAdminLogin');
@@ -649,32 +667,32 @@ Route::group(['prefix' => 'admin'], function () {
  */
 Route::group(['prefix' => 'admin'], function () {
 	// Route::group(['middleware' => ['auth', 'admin']], function () {
-		// Route::get('CronJobs', 'CronJobController@index');
+	// Route::get('CronJobs', 'CronJobController@index');
 
-		Route::get('storeJRAccessories', 'CronJobController@storeJRAccessories');
+	Route::get('storeJRAccessories', 'CronJobController@storeJRAccessories');
 
-		Route::get('storeAmringProducts', 'CronJobController@storeAmringProducts');
-		Route::get('updateAmringProducts', 'CronJobController@updateAmringProducts');
+	Route::get('storeAmringProducts', 'CronJobController@storeAmringProducts');
+	Route::get('updateAmringProducts', 'CronJobController@updateAmringProducts');
 
-		Route::get('storeVandenbanTires', 'CronJobController@storeVandenbanTires');
-		Route::get('updateVandenbanTires', 'CronJobController@updateVandenbanTires');
-		
-		Route::get('storeDelticomTires', 'CronJobController@storeDelticomTires');
-		Route::get('updateDelticomTires', 'CronJobController@updateDelticomTires');
+	Route::get('storeVandenbanTires', 'CronJobController@storeVandenbanTires');
+	Route::get('updateVandenbanTires', 'CronJobController@updateVandenbanTires');
 
-		Route::get('storeABSRims', 'CronJobController@storeABSRims');
-		Route::get('updateABSRims', 'CronJobController@updateABSRims');
-		Route::get('storeABSTires', 'CronJobController@storeABSTires');
-		Route::get('updateABSTires', 'CronJobController@updateABSTires');
+	Route::get('storeDelticomTires', 'CronJobController@storeDelticomTires');
+	Route::get('updateDelticomTires', 'CronJobController@updateDelticomTires');
 
-		Route::get('storeEonTyreTires', 'EontyreApi@list_tyre_products');
-		Route::get('storeEonTyreRims', 'EontyreApi@list_rim_products');
-		Route::get('updateEonTyrePrice', 'EontyreApi@get_price_changes');
-		Route::get('updateEonTyreStock', 'EontyreApi@get_stock_changes');
-		Route::post('creatEonTyreOrder', 'EontyreApi@create_order');
-		
-		// Route::get('storeImadProducts', 'CronJobController@storeImadProducts');
-		// Route::get('storeWZProducts', 'CronJobController@storeWZProducts');
+	Route::get('storeABSRims', 'CronJobController@storeABSRims');
+	Route::get('updateABSRims', 'CronJobController@updateABSRims');
+	Route::get('storeABSTires', 'CronJobController@storeABSTires');
+	Route::get('updateABSTires', 'CronJobController@updateABSTires');
+
+	Route::get('storeEonTyreTires', 'EontyreApi@list_tyre_products');
+	Route::get('storeEonTyreRims', 'EontyreApi@list_rim_products');
+	Route::get('updateEonTyrePrice', 'EontyreApi@get_price_changes');
+	Route::get('updateEonTyreStock', 'EontyreApi@get_stock_changes');
+	Route::post('creatEonTyreOrder', 'EontyreApi@create_order');
+
+	// Route::get('storeImadProducts', 'CronJobController@storeImadProducts');
+	// Route::get('storeWZProducts', 'CronJobController@storeWZProducts');
 	// });
 });
 

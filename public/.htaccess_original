@@ -1,0 +1,147 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+
+    RewriteCond %{THE_REQUEST} (\s|%20)
+    RewriteRule ^([^\s%20]+)(?:\s|%20)+([^\s%20]+)((?:\s|%20)+.*)$ $1-$2$3 [N,DPI]
+    RewriteRule ^([^\s%20]+)(?:\s|%20)+(.*)$ /$1-$2 [L,R=301,DPI]
+
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP_HOST} !^www\. [NC]
+    RewriteRule (.*) https://www.hjulonline.se%{REQUEST_URI} [R=301,L]
+
+    #Force non-www:
+    RewriteCond %{HTTP_HOST} ^hjulonline.se [NC]
+    RewriteRule ^(.*)$ http://www.hjulonline.se/$1 [L,R=301,NC]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    # Handle Authorization Header
+#    RewriteCond %{HTTP:Authorization} .
+#    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+<IfModule mod_filter.c>
+    AddOutputFilterByType DEFLATE "application/atom+xml" \
+                                  "application/javascript" \
+                                  "application/json" \
+                                  "application/ld+json" \
+                                  "application/manifest+json" \
+                                  "application/rdf+xml" \
+                                  "application/rss+xml" \
+                                  "application/schema+json" \
+                                  "application/vnd.geo+json" \
+                                  "application/vnd.ms-fontobject" \
+                                  "application/x-font-ttf" \
+                                  "application/x-javascript" \
+                                  "application/x-web-app-manifest+json" \
+                                  "application/xhtml+xml" \
+                                  "application/xml" \
+                                  "font/eot" \
+                                  "font/opentype" \
+                                  "image/bmp" \
+                                  "image/svg+xml" \
+                                  "image/vnd.microsoft.icon" \
+                                  "image/x-icon" \
+                                  "text/cache-manifest" \
+                                  "text/css" \
+                                  "text/html" \
+                                  "text/javascript" \
+                                  "text/plain" \
+                                  "text/vcard" \
+                                  "text/vnd.rim.location.xloc" \
+                                  "text/vtt" \
+                                  "text/x-component" \
+                                  "text/x-cross-domain-policy" \
+                                  "text/xml"
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresDefault                                      "access plus 0 seconds"
+
+  # CSS
+
+    ExpiresByType text/css                              "access plus 0 seconds"
+
+  # Data interchange
+
+    ExpiresByType application/atom+xml                  "access plus 0 seconds"
+    ExpiresByType application/rdf+xml                   "access plus 0 seconds"
+    ExpiresByType application/rss+xml                   "access plus 0 seconds"
+
+    ExpiresByType application/json                      "access plus 0 seconds"
+    ExpiresByType application/ld+json                   "access plus 0 seconds"
+    ExpiresByType application/schema+json               "access plus 0 seconds"
+    ExpiresByType application/vnd.geo+json              "access plus 0 seconds"
+    ExpiresByType application/xml                       "access plus 0 seconds"
+    ExpiresByType text/xml                              "access plus 0 seconds"
+
+  # Favicon (cannot be renamed!) and cursor images
+
+    ExpiresByType image/vnd.microsoft.icon              "access plus 0 seconds"
+    ExpiresByType image/x-icon                          "access plus 0 seconds"
+
+  # HTML
+
+    ExpiresByType text/html                             "access plus 0 seconds"
+
+  # JavaScript
+
+    ExpiresByType application/javascript                "access plus 0 seconds"
+    ExpiresByType application/x-javascript              "access plus 0 seconds"
+    ExpiresByType text/javascript                       "access plus 0 seconds"
+
+  # Manifest files
+
+    ExpiresByType application/manifest+json             "access plus 0 seconds"
+    ExpiresByType application/x-web-app-manifest+json   "access plus 0 seconds"
+    ExpiresByType text/cache-manifest                   "access plus 0 seconds"
+
+  # Media files
+
+    ExpiresByType audio/ogg                             "access plus 0 seconds"
+    ExpiresByType image/bmp                             "access plus 0 seconds"
+    ExpiresByType image/gif                             "access plus 0 seconds"
+    ExpiresByType image/jpeg                            "access plus 0 seconds"
+    ExpiresByType image/png                             "access plus 0 seconds"
+    ExpiresByType image/svg+xml                         "access plus 0 seconds"
+    ExpiresByType image/webp                            "access plus 0 seconds"
+    ExpiresByType video/mp4                             "access plus 0 seconds"
+    ExpiresByType video/ogg                             "access plus 0 seconds"
+    ExpiresByType video/webm                            "access plus 0 seconds"
+
+  # Web fonts
+
+    # Embedded OpenType (EOT)
+    ExpiresByType application/vnd.ms-fontobject         "access plus 0 seconds"
+    ExpiresByType font/eot                              "access plus 0 seconds"
+
+    # OpenType
+    ExpiresByType font/opentype                         "access plus 0 seconds"
+
+    # TrueType
+    ExpiresByType application/x-font-ttf                "access plus 0 seconds"
+
+    # Web Open Font Format (WOFF) 1.0
+    ExpiresByType application/font-woff                 "access plus 0 seconds"
+    ExpiresByType application/x-font-woff               "access plus 0 seconds"
+    ExpiresByType font/woff                             "access plus 0 seconds"
+
+    # Web Open Font Format (WOFF) 2.0
+    ExpiresByType application/font-woff2                "access plus 0 seconds"
+
+  # Other
+
+    ExpiresByType text/x-cross-domain-policy            "access plus 0 seconds"
+</IfModule>

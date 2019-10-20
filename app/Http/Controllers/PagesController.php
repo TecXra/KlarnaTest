@@ -31,15 +31,15 @@ class PagesController extends Controller
     {
         // error_reporting(0);
         // @ini_set('display_errors', 0);
-        if(isset($_GET['utm_source'])) {
+        if (isset($_GET['utm_source'])) {
             session_start();
             // dd($_GET['utm_source'], $this->get_ip_address(), session_id());
             $adTrack = new AdTracking;
             $adTrack->ip_number = $this->get_ip_address();
             $adTrack->user_session_id = session_id();
             $adTrack->utm_source = $_GET['utm_source'];
-            $adTrack->utm_medium = isset($_GET['utm_medium']) ? $_GET['utm_medium']: "";
-            $adTrack->utm_campaign = isset($_GET['utm_campaign']) ? $_GET['utm_campaign']: "";
+            $adTrack->utm_medium = isset($_GET['utm_medium']) ? $_GET['utm_medium'] : "";
+            $adTrack->utm_campaign = isset($_GET['utm_campaign']) ? $_GET['utm_campaign'] : "";
             $adTrack->save();
         }
     }
@@ -79,12 +79,12 @@ class PagesController extends Controller
         // if(isset($value)) {
         //     return redirect('/searchRegNr');
         // } 
-        
+
         // \SEO::setTitle('Kompletta hjul från Sveriges billigaste aktör - Hjulonline');
 
         // \SEO::setDescription('Handla kompletta hjul till bästa pris på hjulonline.se. Fynda hjul, bildäck och fälg till rekordlåga priser. Fri frakt gäller vid köp av 4 hjul. @hjulonline');
-        
-        
+
+
         $page = Page::where('name', '/')->first();
         SEOMeta::setTitle($page->meta_title)
             ->setDescription($page->meta_description)
@@ -93,22 +93,22 @@ class PagesController extends Controller
         OpenGraph::setTitle("Kompletta hjul");
         OpenGraph::setDescription("Hjul online saluför marknadens billiga kompletta hjul.");
 
-		$rims = Product::where('product_category_id', 2)
-                        ->where('priority', '>', 0)
-                        ->where('priority', '<=', 24)
-                        ->where('is_shown', 1)
-                        ->where('is_deleted', 0)
-                        ->orderBy('priority')->get();
-		$rims->load(['productImages' => function ($query) {
+        $rims = Product::where('product_category_id', 2)
+            ->where('priority', '>', 0)
+            ->where('priority', '<=', 24)
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->orderBy('priority')->get();
+        $rims->load(['productImages' => function ($query) {
             $query->where('priority', 1);
-		}]);
+        }]);
 
         $tires = Product::where('product_category_id', 1)
-                        ->where('priority', '>', 0)
-                        ->where('priority', '<=', 24)
-                        ->where('is_shown', 1)
-                        ->where('is_deleted', 0)
-                        ->orderBy('priority')->get();
+            ->where('priority', '>', 0)
+            ->where('priority', '<=', 24)
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->orderBy('priority')->get();
         $tires->load(['productImages' => function ($query) {
             $query->where('priority', 1);
         }]);
@@ -119,18 +119,16 @@ class PagesController extends Controller
         // $brands = Product::getBrands(1);
         // $models = Product::getModels(1);
         // 
-        
-
 
         $carData = Cookie::get('carSearch');
-        if(isset($carData)) {
+        if (isset($carData)) {
             $carSearch = json_decode(Cookie::get('carSearch'), true);
             $searchData = $carSearch['searchData'];
             $wheelSizes = $carSearch['wheelSizes'];
-            
+
             return view('pages.complete_wheels', compact('rims', 'tires', 'searchData', 'wheelSizes', 'page'))->render();
         } else {
-            return view('pages.complete_wheels', compact('rims', 'tires', 'page'))->render(); 
+            return view('pages.complete_wheels', compact('rims', 'tires', 'page'))->render();
         }
     }
 
@@ -138,15 +136,15 @@ class PagesController extends Controller
     {
         // return view('under_construction');
         $value = Cookie::get('carSearch');
-        if(isset($value)) {
+        if (isset($value)) {
             return redirect('/sok/reg/falgar');
-        } 
+        }
 
         $page = Page::where('name', 'falgar')->first();
         SEOMeta::setTitle($page->meta_title)
             ->setDescription($page->meta_description)
             ->setKeywords($page->meta_keywords)
-            ->setCanonical( env('APP_URL') . "/falgar" );
+            ->setCanonical(env('APP_URL') . "/falgar");
 
         OpenGraph::setTitle("Fälgar");
         OpenGraph::setDescription("Här handlar man Fälgar, aluminiumfälgar och snygga fäljar.");
@@ -162,20 +160,20 @@ class PagesController extends Controller
         // $carList = $this->getCarManuf();
 
         // dd($carList[0]);
-		// $products = Product::where('product_category_id', 2)
-  //                       ->where('priority', '>', 0)
-  //                       ->where('priority', '<=', 24)
-  //                       ->where('is_shown', 1)
-  //                       ->where('is_deleted', 0)
-  //                       ->orderBy('priority')
-  //                       ->get();
+        // $products = Product::where('product_category_id', 2)
+        //                       ->where('priority', '>', 0)
+        //                       ->where('priority', '<=', 24)
+        //                       ->where('is_shown', 1)
+        //                       ->where('is_deleted', 0)
+        //                       ->orderBy('priority')
+        //                       ->get();
         // Cache::flush();
-        $products = Cache::remember('rims_products_cache' . '_page_' . $request->page, 720, function() {
+        $products = Cache::remember('rims_products_cache' . '_page_' . $request->page, 720, function () {
             return Product::where('product_category_id', 2)
-                        ->where('is_shown', 1)
-                        ->where('is_deleted', 0)
-                        ->orderBy('price')
-                        ->paginate(18);
+                ->where('is_shown', 1)
+                ->where('is_deleted', 0)
+                ->orderBy('price')
+                ->paginate(18);
         });
 
         // $products = Product::where('product_category_id', 2)
@@ -184,28 +182,28 @@ class PagesController extends Controller
         //                 ->orderBy('price')
         //                 ->paginate(18);
 
-        if($request->ajax()) {
+        if ($request->ajax()) {
             return [
                 'searchResult' => view('search.partials.search_result.front_page_products', compact('products'))->render(),
             ];
         }
 
-    	return view('pages.rims', compact('products', 'carList', 'inches', 'widths', 'ets', 'pcds', 'brands', 'searchFilter', 'page'));
+        return view('pages.rims', compact('products', 'carList', 'inches', 'widths', 'ets', 'pcds', 'brands', 'searchFilter', 'page'));
     }
 
     public function summerTires(Request $request)
     {
         // return view('under_construction');
         $value = Cookie::get('carSearch');
-        if(isset($value)) {
+        if (isset($value)) {
             return redirect('/sok/reg/sommardack');
-        }  
+        }
 
         $page = Page::where('name', 'sommardack')->first();
         SEOMeta::setTitle($page->meta_title)
             ->setDescription($page->meta_description)
             ->setKeywords($page->meta_keywords)
-            ->setCanonical( env('APP_URL') . "/sommardack" );
+            ->setCanonical(env('APP_URL') . "/sommardack");
 
         OpenGraph::setTitle("Sommardäck");
         OpenGraph::setDescription("Hitta sommardäck och sommarhjul till billiga priser.");
@@ -228,14 +226,14 @@ class PagesController extends Controller
         //                     ->orderBy('priority')
         //                     ->get();
 
-        $products = Cache::remember('summerTire_products_cache' . '_page_' . $request->page, 720, function() {
-             return $products = Product::where('product_category_id', 1)
-                        ->where('product_type_id', 1)
-                        ->where('is_shown', 1)
-                        ->where('is_deleted', 0)
-                        ->orderBy('price')
-                        ->paginate(18);
-        });                    
+        $products = Cache::remember('summerTire_products_cache' . '_page_' . $request->page, 720, function () {
+            return $products = Product::where('product_category_id', 1)
+                ->where('product_type_id', 1)
+                ->where('is_shown', 1)
+                ->where('is_deleted', 0)
+                ->orderBy('price')
+                ->paginate(18);
+        });
         // $products = Product::where('product_category_id', 1)
         //                 ->where('product_type_id', 1)
         //                 ->where('is_shown', 1)
@@ -243,16 +241,16 @@ class PagesController extends Controller
         //                 ->orderBy('price')
         //                 ->paginate(18);
 
-        if(sizeOf($products) <= 0) {
+        if (sizeOf($products) <= 0) {
             $products = Product::where('product_category_id', 1)
-                            ->where('product_type_id', 1)
-                            ->where('is_shown', 1)
-                            ->where('is_deleted', 0)
-                            ->orderBy('price')
-                            ->take(6)->get();
-        }    
+                ->where('product_type_id', 1)
+                ->where('is_shown', 1)
+                ->where('is_deleted', 0)
+                ->orderBy('price')
+                ->take(6)->get();
+        }
 
-        if($request->ajax()) {
+        if ($request->ajax()) {
             return [
                 'searchResult' => view('search.partials.search_result.front_page_products', compact('products'))->render(),
             ];
@@ -265,15 +263,15 @@ class PagesController extends Controller
     {
         // return view('under_construction');
         $value = Cookie::get('carSearch');
-        if(isset($value)) {
+        if (isset($value)) {
             return redirect('/sok/reg/friktionsdack');
-        }  
+        }
 
         $page = Page::where('name', 'friktionsdack')->first();
         SEOMeta::setTitle($page->meta_title)
             ->setDescription($page->meta_description)
             ->setKeywords($page->meta_keywords)
-            ->setCanonical( env('APP_URL') . "/friktionsdack" );
+            ->setCanonical(env('APP_URL') . "/friktionsdack");
 
         OpenGraph::setTitle("Friktionsdäck");
         OpenGraph::setDescription("Friktionsdäck är vinterdäck utan dubbar. Så kallade dubbfria vinterdäck.");
@@ -294,16 +292,16 @@ class PagesController extends Controller
         //                     ->where('is_deleted', 0)
         //                     ->orderBy('priority')
         //                     ->get();
-        
 
-        $products = Cache::remember('friktionTire_products_cache' . '_page_' . $request->page, 720, function() {
-             return $products = Product::where('product_category_id', 1)
-                        ->where('product_type_id', 2)
-                        ->where('is_shown', 1)
-                        ->where('is_deleted', 0)
-                        ->orderBy('price')
-                        ->paginate(18);
-        }); 
+
+        $products = Cache::remember('friktionTire_products_cache' . '_page_' . $request->page, 720, function () {
+            return $products = Product::where('product_category_id', 1)
+                ->where('product_type_id', 2)
+                ->where('is_shown', 1)
+                ->where('is_deleted', 0)
+                ->orderBy('price')
+                ->paginate(18);
+        });
 
         // $products = Product::where('product_category_id', 1)
         //                 ->where('product_type_id', 2)
@@ -312,16 +310,16 @@ class PagesController extends Controller
         //                 ->orderBy('price')
         //                 ->paginate(18);
 
-        if(sizeOf($products) <= 0) {
+        if (sizeOf($products) <= 0) {
             $products = Product::where('product_category_id', 1)
-                            ->where('product_type_id', 2)
-                            ->where('is_shown', 1)
-                            ->where('is_deleted', 0)
-                            ->orderBy('price')
-                            ->take(6)->get();
-        }    
+                ->where('product_type_id', 2)
+                ->where('is_shown', 1)
+                ->where('is_deleted', 0)
+                ->orderBy('price')
+                ->take(6)->get();
+        }
 
-        if($request->ajax()) {
+        if ($request->ajax()) {
             return [
                 'searchResult' => view('search.partials.search_result.front_page_products', compact('products'))->render(),
             ];
@@ -334,14 +332,14 @@ class PagesController extends Controller
     {
         // return view('under_construction');
         $value = Cookie::get('carSearch');
-        if(isset($value)) {
+        if (isset($value)) {
             return redirect('/sok/reg/dubbdack');
-        }  
+        }
         $page = Page::where('name', 'dubbdack')->first();
         SEOMeta::setTitle($page->meta_title)
             ->setDescription($page->meta_description)
             ->setKeywords($page->meta_keywords)
-            ->setCanonical( env('APP_URL') . "/dubbdack" );
+            ->setCanonical(env('APP_URL') . "/dubbdack");
 
         OpenGraph::setTitle("Dubbdäck");
         OpenGraph::setDescription("Dubbdäck är vinterdäck med dubbar. Så kallade dubbade däck.");
@@ -363,16 +361,16 @@ class PagesController extends Controller
         //                     ->where('is_deleted', 0)
         //                     ->orderBy('priority')
         //                     ->get();
-            
 
-        $products = Cache::remember('studdedTire_products_cache' . '_page_' . $request->page, 720, function() {
-             return $products = Product::where('product_category_id', 1)
-                        ->where('product_type_id', 3)
-                        ->where('is_shown', 1)
-                        ->where('is_deleted', 0)
-                        ->orderBy('price')
-                        ->paginate(18);
-        }); 
+
+        $products = Cache::remember('studdedTire_products_cache' . '_page_' . $request->page, 720, function () {
+            return $products = Product::where('product_category_id', 1)
+                ->where('product_type_id', 3)
+                ->where('is_shown', 1)
+                ->where('is_deleted', 0)
+                ->orderBy('price')
+                ->paginate(18);
+        });
 
         // $products = Product::where('product_category_id', 1)
         //                 ->where('product_type_id', 3)
@@ -381,16 +379,16 @@ class PagesController extends Controller
         //                 ->orderBy('price')
         //                 ->paginate(18);
 
-        if(sizeOf($products) <= 0) {
+        if (sizeOf($products) <= 0) {
             $products = Product::where('product_category_id', 1)
-                            ->where('product_type_id', 3)
-                            ->where('is_shown', 1)
-                            ->where('is_deleted', 0)
-                            ->orderBy('price')
-                            ->take(6)->get();
-        }    
+                ->where('product_type_id', 3)
+                ->where('is_shown', 1)
+                ->where('is_deleted', 0)
+                ->orderBy('price')
+                ->take(6)->get();
+        }
 
-        if($request->ajax()) {
+        if ($request->ajax()) {
             return [
                 'searchResult' => view('search.partials.search_result.front_page_products', compact('products'))->render(),
             ];
@@ -403,31 +401,31 @@ class PagesController extends Controller
     public function showTiresByBrand(Request $request, $brand)
     {
 
-        $product['items'] = Product::where( function($query) use ($brand) {
-                                return $query
-                                         ->where('product_brand', $brand)
-                                         ->orWhere('product_brand', str_replace('-', ' ', $brand));
-                            })
-                            ->where('product_category_id', 1)
-                            ->where('is_shown', 1)
-                            ->where('is_deleted', 0)
-                            ->orderBy('price')
-                            ->paginate(24);
+        $product['items'] = Product::where(function ($query) use ($brand) {
+            return $query
+                ->where('product_brand', $brand)
+                ->orWhere('product_brand', str_replace('-', ' ', $brand));
+        })
+            ->where('product_category_id', 1)
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->orderBy('price')
+            ->paginate(24);
         // dd(str_slug($brand), $brand, $product['items']);
         // dd($brand, $product['items']);
 
-        if(sizeOf($product['items']) <= 0) 
-            return redirect(''); 
+        if (sizeOf($product['items']) <= 0)
+            return redirect('');
 
         SEOMeta::setTitle(
-                $product['items']->first()->product_brand. " däck  | Kompletta hjul på 3 sek - Hjulonline.se" 
-            )->setDescription(
-                "Brett sortiment av ". 
-                $product['items']->first()->product_brand ." däck. Hitta passform med hjälp av registreringsnumret. Tar inte mer än 3 sekunder. Leverans inom 24h! @hjulonline "
-            )
-            ->setCanonical( env('APP_URL') . "/dack/" . str_slug($product['items']->first()->product_brand) );
+            $product['items']->first()->product_brand . " däck  | Kompletta hjul på 3 sek - Hjulonline.se"
+        )->setDescription(
+            "Brett sortiment av " .
+                $product['items']->first()->product_brand . " däck. Hitta passform med hjälp av registreringsnumret. Tar inte mer än 3 sekunder. Leverans inom 24h! @hjulonline "
+        )
+            ->setCanonical(env('APP_URL') . "/dack/" . str_slug($product['items']->first()->product_brand));
 
-        if($request->ajax()) {
+        if ($request->ajax()) {
             return [
                 'searchResult' => view('search.partials.search_result.search_tires', compact('product'))->render(),
             ];
@@ -439,32 +437,32 @@ class PagesController extends Controller
     public function showRimsByBrand(Request $request, $brand)
     {
 
-        $product['items'] = Product::where( function($query) use ($brand) {
-                                return $query
-                                         ->where('product_brand', $brand)
-                                         ->orWhere('product_brand', str_replace('-', ' ', $brand));
-                            })
-                            ->where('product_category_id', 2)
-                            ->where('is_shown', 1)
-                            ->where('is_deleted', 0)
-                            ->orderBy('price')
-                            ->paginate(24);
+        $product['items'] = Product::where(function ($query) use ($brand) {
+            return $query
+                ->where('product_brand', $brand)
+                ->orWhere('product_brand', str_replace('-', ' ', $brand));
+        })
+            ->where('product_category_id', 2)
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->orderBy('price')
+            ->paginate(24);
         // dd($brand, $product['items']);
 
-        if(sizeOf($product['items']) <= 0) 
-            return redirect(''); 
-        
+        if (sizeOf($product['items']) <= 0)
+            return redirect('');
+
         SEOMeta::setTitle(
-                $product['items']->first()->product_brand. " fälgar  | Kompletta hjul på 3 sek - Hjulonline.se" 
-            )
-        // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
+            $product['items']->first()->product_brand . " fälgar  | Kompletta hjul på 3 sek - Hjulonline.se"
+        )
+            // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
             ->setDescription(
-                "Brett sortiment av ". 
-                $product['items']->first()->product_brand ." fälgar. Hitta passform med hjälp av registreringsnumret. Tar inte mer än 3 sekunder. Leverans inom 24h! @hjulonline "
-            )->setCanonical( env('APP_URL') . "/falg/" . str_slug($product['items']->first()->product_brand) );
+                "Brett sortiment av " .
+                    $product['items']->first()->product_brand . " fälgar. Hitta passform med hjälp av registreringsnumret. Tar inte mer än 3 sekunder. Leverans inom 24h! @hjulonline "
+            )->setCanonical(env('APP_URL') . "/falg/" . str_slug($product['items']->first()->product_brand));
 
 
-        if($request->ajax()) {
+        if ($request->ajax()) {
             return [
                 'searchResult' => view('search.partials.search_result.search_tires', compact('product'))->render(),
             ];
@@ -492,7 +490,9 @@ class PagesController extends Controller
 
         // return response()->view('pages.product_feed_tires', compact('products'))->header('Content-Type', 'text/xml');
 
-        $products = DB::select( DB::raw("
+        $products = DB::select(
+            DB::raw(
+                "
                         SELECT 
                             p.product_name AS 'ProductName', 
                             CONCAT(p.main_supplier_id, '-', p.main_supplier_product_id ) AS 'ArticleNr',
@@ -542,7 +542,9 @@ class PagesController extends Controller
 
         // return response()->view('pages.product_feed_rims', compact('products'))->header('Content-Type', 'text/xml');
 
-        $products = DB::select( DB::raw("
+        $products = DB::select(
+            DB::raw(
+                "
                         SELECT 
                             p.product_name AS 'ProductName', 
                             CONCAT(p.main_supplier_id, '-', p.main_supplier_product_id ) AS 'ArticleNr',
@@ -601,20 +603,20 @@ class PagesController extends Controller
     {
 
         $page = Page::where('name', $slug)->where('is_active', 1)->where('is_removable', 1)->first();
-        if(sizeOf($page) <= 0)
+        if (sizeOf($page) <= 0)
             abort(404);
 
         SEOMeta::setTitle($page->meta_title)
             ->setDescription($page->meta_description)
             ->setKeywords($page->meta_keywords);
-            // ->addKeyword($keyword)
-            // ->addMeta($meta, $value);
+        // ->addKeyword($keyword)
+        // ->addMeta($meta, $value);
 
         $blogSetting = Setting::find(1);
 
         // dd($page->id, $blogSetting->value);
 
-        if($page->id == $blogSetting->value) {
+        if ($page->id == $blogSetting->value) {
             // dd($page->id, $blogSetting->value);
             $posts = Page::where('is_post', 1)->where('is_active', 1)->orderBy('updated_at', 'DESC')->paginate(5);
             return view('pages.cms_blog', compact('page', 'posts'));
@@ -627,27 +629,27 @@ class PagesController extends Controller
     public function showSimpleProduct($id = null)
     {
 
-        $product = Product::where('id', $id)->get(); 
-        if(sizeOf($product)<= 0)
+        $product = Product::where('id', $id)->get();
+        if (sizeOf($product) <= 0)
             return redirect('');
 
         $qty = 4;
-        
+
         SEOMeta::setTitle(
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " | " . 
-                $product->first()->product_dimension. " " . 
-                'Fler än '. $product->first()->id. " - hjulonline.se"
-            )
-        // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
+            $product->first()->product_brand . " " .
+                $product->first()->product_model . " " .
+                $product->first()->productType->label . " | " .
+                $product->first()->product_dimension . " " .
+                'Fler än ' . $product->first()->id . " - hjulonline.se"
+        )
+            // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
             ->setDescription(
-                "Handla ".
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " i storlek " . 
-                $product->first()->product_dimension. " hos hjulonline.se, Finns fler än " . 
-                $product->first()->id." ". $product->first()->productType->label ." i lager. Leverans samma dag!"
+                "Handla " .
+                    $product->first()->product_brand . " " .
+                    $product->first()->product_model . " " .
+                    $product->first()->productType->label . " i storlek " .
+                    $product->first()->product_dimension . " hos hjulonline.se, Finns fler än " .
+                    $product->first()->id . " " . $product->first()->productType->label . " i lager. Leverans samma dag!"
             );
 
 
@@ -656,7 +658,7 @@ class PagesController extends Controller
         $product->load(['productImages' => function ($query) {
             // $query->where('priority', 1);
             $query->orderBy('priority');
-        }]);    
+        }]);
 
         return view('pages.product_details', compact('product', 'qty'));
     }
@@ -666,27 +668,27 @@ class PagesController extends Controller
     {
         $id = $id == 'pcd' || $id == null ? $dimension : $id;
         // dd($brand, $model, $dimension, $id);
-        $product = Product::where('id', $id)->get(); 
-        if(sizeOf($product)<= 0)
+        $product = Product::where('id', $id)->get();
+        if (sizeOf($product) <= 0)
             return redirect('');
 
         $qty = 4;
-         
+
         SEOMeta::setTitle(
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " | " . 
-                $product->first()->product_dimension. " " . 
-                'Fler än '. $product->first()->id. " - hjulonline.se"
-            )
-        // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
+            $product->first()->product_brand . " " .
+                $product->first()->product_model . " " .
+                $product->first()->productType->label . " | " .
+                $product->first()->product_dimension . " " .
+                'Fler än ' . $product->first()->id . " - hjulonline.se"
+        )
+            // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
             ->setDescription(
-                "Handla ".
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " i storlek " . 
-                $product->first()->product_dimension. " hos hjulonline.se, Finns fler än " . 
-                $product->first()->id." ". $product->first()->productType->label ." i lager. Leverans samma dag!"
+                "Handla " .
+                    $product->first()->product_brand . " " .
+                    $product->first()->product_model . " " .
+                    $product->first()->productType->label . " i storlek " .
+                    $product->first()->product_dimension . " hos hjulonline.se, Finns fler än " .
+                    $product->first()->id . " " . $product->first()->productType->label . " i lager. Leverans samma dag!"
             );
 
 
@@ -695,7 +697,7 @@ class PagesController extends Controller
         $product->load(['productImages' => function ($query) {
             // $query->where('priority', 1);
             $query->orderBy('priority');
-        }]);    
+        }]);
 
         return view('pages.product_details', compact('product', 'qty'));
     }
@@ -704,33 +706,33 @@ class PagesController extends Controller
     {
         // $id = $id == 'pcd' || $id == null ? $dimension : $id;
         // dd($brand, $model, $dimension, $id);
-        $product = Product::where('id', $id)->get(); 
-        if(sizeOf($product)<= 0)
+        $product = Product::where('id', $id)->get();
+        if (sizeOf($product) <= 0)
             return redirect('');
 
         $qty = 4;
 
         SEOMeta::setTitle(
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " | " . 
-                $product->first()->product_dimension. " " . 
-                'Fler än '. $product->first()->id. " - hjulonline.se"
-            )
-        // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
+            $product->first()->product_brand . " " .
+                $product->first()->product_model . " " .
+                $product->first()->productType->label . " | " .
+                $product->first()->product_dimension . " " .
+                'Fler än ' . $product->first()->id . " - hjulonline.se"
+        )
+            // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
             ->setDescription(
-                "Handla ".
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " i storlek " . 
-                $product->first()->product_dimension. " hos hjulonline.se, Finns fler än " . 
-                $product->first()->id." ". $product->first()->productType->label ." i lager. Leverans samma dag!"
+                "Handla " .
+                    $product->first()->product_brand . " " .
+                    $product->first()->product_model . " " .
+                    $product->first()->productType->label . " i storlek " .
+                    $product->first()->product_dimension . " hos hjulonline.se, Finns fler än " .
+                    $product->first()->id . " " . $product->first()->productType->label . " i lager. Leverans samma dag!"
             );
 
         $product->load(['productImages' => function ($query) {
             // $query->where('priority', 1);
             $query->orderBy('priority');
-        }]);    
+        }]);
 
         $rim_dimension_search = true;
 
@@ -741,33 +743,33 @@ class PagesController extends Controller
     {
         $id = $id == 'pcd' || $id == null ? $dimension : $id;
         // dd($brand, $model, $dimension, $id);
-        $product = Product::where('id', $id)->get(); 
-        if(sizeOf($product)<= 0)
+        $product = Product::where('id', $id)->get();
+        if (sizeOf($product) <= 0)
             return redirect('');
 
         $qty = 4;
 
         SEOMeta::setTitle(
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " | " . 
-                $product->first()->product_dimension. " " . 
-                'Fler än '. $product->first()->id. " - hjulonline.se"
-            )
-        // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
+            $product->first()->product_brand . " " .
+                $product->first()->product_model . " " .
+                $product->first()->productType->label . " | " .
+                $product->first()->product_dimension . " " .
+                'Fler än ' . $product->first()->id . " - hjulonline.se"
+        )
+            // Handla Image Torino fälgar i storlek 5.5X14 hos hjulonline.se, Finns fler ä 1129 fälgar i lager. Leverans samma dag!
             ->setDescription(
-                "Handla ".
-                $product->first()->product_brand. " ". 
-                $product->first()->product_model. " ". 
-                $product->first()->productType->label. " i storlek " . 
-                $product->first()->product_dimension. " hos hjulonline.se, Finns fler än " . 
-                $product->first()->id." ". $product->first()->productType->label ." i lager. Leverans samma dag!"
+                "Handla " .
+                    $product->first()->product_brand . " " .
+                    $product->first()->product_model . " " .
+                    $product->first()->productType->label . " i storlek " .
+                    $product->first()->product_dimension . " hos hjulonline.se, Finns fler än " .
+                    $product->first()->id . " " . $product->first()->productType->label . " i lager. Leverans samma dag!"
             );
 
         $product->load(['productImages' => function ($query) {
             // $query->where('priority', 1);
             $query->orderBy('priority');
-        }]);    
+        }]);
 
         $rim_dimension_search = true;
 
@@ -792,53 +794,53 @@ class PagesController extends Controller
     public function accessories()
     {
         $tpms = Product::where('product_type_id', 7)
-                             ->where('is_shown', 1)
-                             ->where('is_deleted', 0)
-                             ->first();
-        if(sizeOf($tpms) > 0)
-            $products['tpms'] = $tpms;
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
+        if (sizeOf($tpms) > 0)
+            $products['tpms'] = $tpms[0];
 
         $nuts = Product::where('product_type_id', 8)
-                             ->where('is_shown', 1)
-                             ->where('is_deleted', 0)
-                             ->first();
-        if(sizeOf($nuts) > 0)
-            $products['nuts'] = $nuts;
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
+        if (sizeOf($nuts) > 0)
+            $products['nuts'] = $nuts[0];
 
         $bolts = Product::where('product_type_id', 9)
-                             ->where('is_shown', 1)
-                             ->where('is_deleted', 0)
-                             ->first();
-        if(sizeOf($bolts) > 0)
-            $products['bolts'] = $bolts;
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
+        if (sizeOf($bolts) > 0)
+            $products['bolts'] = $bolts[0];
 
         $rings = Product::where('product_type_id', 10)
-                             ->where('is_shown', 1)
-                             ->where('is_deleted', 0)
-                             ->first();
-        if(sizeOf($rings) > 0)
-            $products['rings'] = $rings;
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
+        if (sizeOf($rings) > 0)
+            $products['rings'] = $rings[0];
 
-         $monteringskit = Product::where('product_type_id', 11)
-                             ->where('is_shown', 1)
-                             ->where('is_deleted', 0)
-                             ->first();
-        if(sizeOf($monteringskit) > 0)
-            $products['monteringskit'] = $monteringskit;
+        $monteringskit = Product::where('product_type_id', 11)
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
+        if (sizeOf($monteringskit) > 0)
+            $products['monteringskit'] = $monteringskit[0];
 
         $wheelBolt = Product::where('product_type_id', 12)
-                             ->where('is_shown', 1)
-                             ->where('is_deleted', 0)
-                             ->first();
-        if(sizeOf($wheelBolt) > 0)
-            $products['wheelBolt'] = $wheelBolt;
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
+        if (sizeOf($wheelBolt) > 0)
+            $products['wheelBolt'] = $wheelBolt[0];
 
         $spacer = Product::where('product_type_id', 13)
-                             ->where('is_shown', 1)
-                             ->where('is_deleted', 0)
-                             ->first();
-        if(sizeOf($spacer) > 0)
-            $products['spacer'] = $spacer;
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
+        if (sizeOf($spacer) > 0)
+            $products['spacer'] = $spacer[0];
 
         // $services = Product::where('product_type_id', 14)
         //                      ->where('is_shown', 1)
@@ -853,7 +855,6 @@ class PagesController extends Controller
         //                      ->first();
         // if(sizeOf($other) > 0)
         //     $products['other'] = $other;
-
 
         $page = Page::where('name', 'tillbehor')->first();
         SEOMeta::setTitle($page->meta_title)
@@ -871,9 +872,9 @@ class PagesController extends Controller
     public function showTPMS()
     {
         $product = Product::where('product_type_id', 7)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -881,10 +882,10 @@ class PagesController extends Controller
     public function showNuts()
     {
         $product = Product::where('product_type_id', 8)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
-    
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
+
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -893,9 +894,9 @@ class PagesController extends Controller
     public function showBolts()
     {
         $product = Product::where('product_type_id', 9)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -903,12 +904,12 @@ class PagesController extends Controller
     public function showRings()
     {
         $product = Product::where('product_type_id', 10)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->orderBy(DB::raw('cast(product_dimension as unsigned)'), 'ASC')
-                    ->orderBy('product_dimension', 'DESC')
-                    ->first();
-        
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->orderBy(DB::raw('cast(product_dimension as unsigned)'), 'ASC')
+            ->orderBy('product_dimension', 'DESC')
+            ->first();
+
         $qty = 4;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -916,7 +917,7 @@ class PagesController extends Controller
     public function showRingDetails($id)
     {
         $product = Product::find($id);
-        
+
         $qty = 4;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -924,10 +925,10 @@ class PagesController extends Controller
     public function showMonteringskit()
     {
         $product = Product::where('product_type_id', 11)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
-        
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
+
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -935,10 +936,10 @@ class PagesController extends Controller
     public function showLockBolts()
     {
         $product = Product::where('product_type_id', 12)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
-        
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
+
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -946,10 +947,10 @@ class PagesController extends Controller
     public function showSpacers()
     {
         $product = Product::where('product_type_id', 13)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
-        
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
+
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -957,10 +958,10 @@ class PagesController extends Controller
     public function showServices()
     {
         $product = Product::where('product_type_id', 14)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
-        
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
+
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -968,10 +969,10 @@ class PagesController extends Controller
     public function showOther()
     {
         $product = Product::where('product_type_id', 18)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->first();
-        
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->first();
+
         $qty = 1;
         return view('pages.accessory_details', compact('product', 'qty'));
     }
@@ -980,13 +981,13 @@ class PagesController extends Controller
     {
 
         $product = Product::distinct('product_inner_dimension')->where('product_type_id', 10)
-                    ->where('product_dimension', $request->outerD)
-                    ->where('is_shown', 1)
-                    ->where('is_deleted', 0)
-                    ->get();
+            ->where('product_dimension', $request->outerD)
+            ->where('is_shown', 1)
+            ->where('is_deleted', 0)
+            ->get();
         // dd($request->outerD, $product);
         $html = "";
-        foreach ($product as $innerD){
+        foreach ($product as $innerD) {
             $html .= "<option value='{$innerD->product_inner_dimension}'>{$innerD->product_inner_dimension}</option>";
         }
 
@@ -1027,19 +1028,19 @@ class PagesController extends Controller
 
     public function filterRingDimension($outerID, $innerID)
     {
-        if($innerID == '-') {
+        if ($innerID == '-') {
             $product = Product::where('product_type_id', 10)
-                    ->where('product_dimension', $outerID)
-                    ->where('is_shown', 1)
-                    ->first();
+                ->where('product_dimension', $outerID)
+                ->where('is_shown', 1)
+                ->first();
         } else {
             $product = Product::where('product_type_id', 10)
-                    ->where('product_dimension', $outerID)
-                    ->where('product_inner_dimension', $innerID)
-                    ->where('is_shown', 1)
-                    ->first();
+                ->where('product_dimension', $outerID)
+                ->where('product_inner_dimension', $innerID)
+                ->where('is_shown', 1)
+                ->first();
         }
-        
+
 
         $qty = 4;
         return view('pages.accessory_details', compact('product', 'qty'));
@@ -1081,7 +1082,8 @@ class PagesController extends Controller
     //     return view('pages.about');
     // }
 
-    function get_ip_address() {
+    function get_ip_address()
+    {
         // check for shared internet/ISP IP
         if (!empty($_SERVER['HTTP_CLIENT_IP']) && validate_ip($_SERVER['HTTP_CLIENT_IP'])) {
             return $_SERVER['HTTP_CLIENT_IP'];
@@ -1118,7 +1120,8 @@ class PagesController extends Controller
      * Ensures an ip address is both a valid IP and does not fall within
      * a private network range.
      */
-    function validate_ip($ip) {
+    function validate_ip($ip)
+    {
         if (strtolower($ip) === 'unknown')
             return false;
 
@@ -1143,5 +1146,4 @@ class PagesController extends Controller
         }
         return true;
     }
-
 }

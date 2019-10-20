@@ -6,7 +6,7 @@
     <div class="row">
         <div class="breadcrumbDiv col-lg-12">
             <ul class="breadcrumb">
-                <li><a href="{{ url('') }}">Hem</a></li>
+                <li><a href="{{ url('/') }}">Hem</a></li>
                 <li class="active"> Order bekräftelse</li>
             </ul>
         </div>

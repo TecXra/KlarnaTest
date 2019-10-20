@@ -24,7 +24,7 @@ class CartController extends Controller
     public function index()
     {
         $orders = Order::where('order_status_id', 0)->get();
-        if(count($orders) > 0) {
+        if (count($orders) > 0) {
             foreach ($orders as $order) {
                 //$order->delete();
             }
@@ -37,8 +37,8 @@ class CartController extends Controller
         $addedMount = null;
         $addedKit = null;
         $cantOrder = false;
-        if(sizeof(Cart::content()) > 0) {
-            foreach(Cart::content() as $item) {
+        if (sizeof(Cart::content()) > 0) {
+            foreach (Cart::content() as $item) {
                 // if (\App::environment('production')) {
                 //     if($item->model->id === 15833) {
                 //         $addedMount = true;
@@ -48,33 +48,32 @@ class CartController extends Controller
                 //         $addedMount = true;
                 //     }
                 // }
-                if($item->model->id == 4) {
+                if ($item->model->id == 4) {
                     $addedMount = true;
                 }
 
-                if($item->model->id == 2) {
+                if ($item->model->id == 2) {
                     $addedKit = true;
                 }
 
-                if($item->options->product_category_id == 1)
+                if ($item->options->product_category_id == 1)
                     $tireCount += $item->qty;
 
-                if($item->options->product_category_id == 2)
+                if ($item->options->product_category_id == 2)
                     $rimsCount += $item->qty;
-
             }
         }
-        $cantOrder = ($tireCount>0 and $tireCount<4) ? true : $cantOrder;
-        $cantOrder = ($rimsCount>0 and $rimsCount<4) ? true : $cantOrder;
+        $cantOrder = ($tireCount > 0 and $tireCount < 4) ? true : $cantOrder;
+        $cantOrder = ($rimsCount > 0 and $rimsCount < 4) ? true : $cantOrder;
         // $addedMount =  empty($inchArr)?  true : null;
         $cookie = json_decode(Cookie::get('cookie'), true);
-        if(isset($cookie['addMount'])) $addedMount = true;
-        if(isset($cookie['addKit'])) $addedKit = true;
-        if(isset($cookie['addTPMS'])) $addedTPMS = true;
-        if(isset($cookie['addCarChange'])) $addedCarChange = true;
-        if(isset($cookie['addLockKit'])) $addedLockKit = true;
+        if (isset($cookie['addMount'])) $addedMount = true;
+        if (isset($cookie['addKit'])) $addedKit = true;
+        if (isset($cookie['addTPMS'])) $addedTPMS = true;
+        if (isset($cookie['addCarChange'])) $addedCarChange = true;
+        if (isset($cookie['addLockKit'])) $addedLockKit = true;
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
 
         $carSearch = json_decode(Cookie::get('carSearch'), true);
         $regNumber = $carSearch['searchData']['RegNumber'];
@@ -99,19 +98,18 @@ class CartController extends Controller
     public function store(Request $request)
     {
 
-        // dd($request->all());
-        if($request->id == 1) {
+        if ($request->id == 1) {
             $cookie = json_decode(Cookie::get('cookie'), true);
             $cookie['addTPMS'] = true;
             $cookie = json_encode($cookie);
-            Cookie::queue('cookie', $cookie, 60*24*7);
+            Cookie::queue('cookie', $cookie, 60 * 24 * 7);
         }
 
-        if($request->id == 2) {
+        if ($request->id == 2) {
             $cookie = json_decode(Cookie::get('cookie'), true);
             $cookie['addKit'] = true;
             $cookie = json_encode($cookie);
-            Cookie::queue('cookie', $cookie, 60*24*7);
+            Cookie::queue('cookie', $cookie, 60 * 24 * 7);
         }
 
         // if($request->id == 4) {
@@ -121,11 +119,11 @@ class CartController extends Controller
         //     Cookie::queue('cookie', $cookie, 60*24*7);
         // }
 
-        if($request->id == 3) {
+        if ($request->id == 3) {
             $cookie = json_decode(Cookie::get('cookie'), true);
             $cookie['addLockKit'] = true;
             $cookie = json_encode($cookie);
-            Cookie::queue('cookie', $cookie, 60*24*7);
+            Cookie::queue('cookie', $cookie, 60 * 24 * 7);
         }
 
         $product = Product::find($request->id);
@@ -139,7 +137,7 @@ class CartController extends Controller
         // $this->validate($request, [
         //     'quantity' => "required|max:{$quantity}",
         // ]);
-        if($product->min_orderble_quantity <=  $product->quantity ) {
+        if ($product->min_orderble_quantity <=  $product->quantity) {
             $validator = Validator($request->all(), [
                 'quantity' => "required|numeric|min:{$product->min_orderble_quantity}|max:{$product->quantity}",
             ]);
@@ -149,7 +147,7 @@ class CartController extends Controller
             ]);
         }
 
-        if ( $validator->fails() ) {
+        if ($validator->fails()) {
             // $errors = $validation->errors();
             return redirect()->back()->withErrors($validator);
         }
@@ -168,7 +166,8 @@ class CartController extends Controller
                 'et' => $product->et,
                 'pcd' => $pcd
             ]
-        )->associate('App\Product','App\Models');
+        )->associate('App\Product', 'App\Models');
+
 
         $gotCompleteRims = false;
         $gotCompleteTires = false;
@@ -177,44 +176,44 @@ class CartController extends Controller
 
         $monteringsKit = Product::find(2);
         $id = $monteringsKit->id;
-        $existMonteringsKit = Cart::search(function($cartItem) use ($id) {
+        $existMonteringsKit = Cart::search(function ($cartItem) use ($id) {
             return $cartItem->id === (string) $id;
         });
 
 
-        $balansering = Product::find(4);
+        $balansering = Product::find(3);
         $id = $balansering->id;
-        $existBalansering = Cart::search(function($cartItem) use ($id) {
+        $existBalansering = Cart::search(function ($cartItem) use ($id) {
             return $cartItem->id === (string) $id;
         });
 
         // dd($existMonteringsKit, sizeof($existMonteringsKit) > 0,  $existBalansering, !sizeof($existBalansering) > 0, $gotCompleteTires, $gotCompleteRims);
 
 
-        if(sizeof(Cart::content()) > 0) {
-            foreach(Cart::content() as $item) {
+        if (sizeof(Cart::content()) > 0) {
+            foreach (Cart::content() as $item) {
 
-                if($item->options->product_category_id == 2 || $item->options->product_category_id == 1) {
+                if ($item->options->product_category_id == 2 || $item->options->product_category_id == 1) {
                     $qtyArr[] = $item->qty;
                 }
 
                 $inchArr[] = $item->model->product_inch;
 
 
-                if($item->options->product_category_id == 2)
+                if ($item->options->product_category_id == 2)
                     $gotRims = true;
 
-                if($item->options->product_category_id == 1)
+                if ($item->options->product_category_id == 1)
                     $gotTires = true;
 
-                if($item->options->product_category_id == 2 && $item->qty >= 4)
+                if ($item->options->product_category_id == 2 && $item->qty >= 4)
                     $gotCompleteRims = true;
 
-                if($item->options->product_category_id == 1 && $item->qty >= 4)
+                if ($item->options->product_category_id == 1 && $item->qty >= 4)
                     $gotCompleteTires = true;
             }
 
-            if($gotCompleteRims && sizeof($existMonteringsKit) <=0) {
+            if ($gotCompleteRims && sizeof($existMonteringsKit) <= 0) {
                 $cartItem = Cart::add(
                     (string) $monteringsKit->id,
                     $monteringsKit->product_name,
@@ -223,18 +222,18 @@ class CartController extends Controller
                     [
                         'product_category_id' => $monteringsKit->product_category_id
                     ]
-                )->associate('App\Product','App\Models');
+                )->associate('App\Product', 'App\Models');
             }
 
-            if($gotRims && $gotTires && sizeof($existBalansering) <=0) {
+            if ($gotRims && $gotTires && sizeof($existBalansering) <= 0) {
                 $inch = max($inchArr);
                 $qty = min($qtyArr);
 
-                if(!empty($inch)) {
+                if (!empty($inch)) {
                     $mountPrice = 0;
                     $mountPrice = Profit::where('product_type', 3)
-                            ->where('size', $inch)
-                            ->first()->mount;
+                        ->where('size', $inch)
+                        ->first()->mount;
 
                     $cartItem = Cart::add(
                         (string) $balansering->id,
@@ -244,22 +243,22 @@ class CartController extends Controller
                         [
                             'product_category_id' => $balansering->product_category_id
                         ]
-                    )->associate('App\Product','App\Models');
+                    )->associate('App\Product', 'App\Models');
                 }
             }
             // dd($existMonteringsKit, $existBalansering, $gotCompleteRims, $gotCompleteTires);
         }
 
         $id = $request->id;
-        $existingItem = Cart::search(function($cartItem) use ($id) {
+        $existingItem = Cart::search(function ($cartItem) use ($id) {
             return $cartItem->id == $id;
         });
         // dd($existingItem);
 
         $carSearch = json_decode(Cookie::get('carSearch'), true);
         $completeTiresProcess = isset($carSearch['completeTiresProcess']) ? $carSearch['completeTiresProcess'] : null;
-        if($completeTiresProcess == 1) {
-            if($existingItem->first()->qty > $product->quantity && $product->product_category_id !== 2) {
+        if ($completeTiresProcess == 1) {
+            if ($existingItem->first()->qty > $product->quantity && $product->product_category_id !== 2) {
                 Cart::update($existingItem->first()->rowId, $product->quantity);
                 session()->flash('error_message', "Kvantiten får inte överstiga lagersaldot {$product->quantity}!");
                 return redirect('varukorg');
@@ -268,8 +267,8 @@ class CartController extends Controller
                 return redirect('sok/reg/kompletta-hjul/dack');
             }
         }
-        if($completeTiresProcess == 2) {
-            if($existingItem->first()->qty > $product->quantity && $product->product_category_id !== 2) {
+        if ($completeTiresProcess == 2) {
+            if ($existingItem->first()->qty > $product->quantity && $product->product_category_id !== 2) {
                 Cart::update($existingItem->first()->rowId, $product->quantity);
                 session()->flash('error_message', "Kvantiten får inte överstiga lagersaldot {$product->quantity}!");
                 return redirect('varukorg');
@@ -284,7 +283,7 @@ class CartController extends Controller
             'alert-typ' => 'success'
         ];
 
-        if($existingItem->first()->qty > $product->quantity && $product->product_category_id !== 2) {
+        if ($existingItem->first()->qty > $product->quantity && $product->product_category_id !== 2) {
             Cart::update($existingItem->first()->rowId, $product->quantity);
             session()->flash('error_message', "Kvantiten får inte överstiga lagersaldot {$product->quantity}!");
             return redirect('varukorg');
@@ -292,8 +291,6 @@ class CartController extends Controller
             // return redirect()->back()->withSuccessMessage('Varan har lagts till din varukorg!');
             return redirect()->back()->with($notification);
         }
-
-
     }
 
     /**
@@ -307,7 +304,7 @@ class CartController extends Controller
     {
         $product = Product::find($request->id);
         $shippingCost = 0;
-        if($product->product_category_id === 1 || $product->product_category_id === 2 ){
+        if ($product->product_category_id === 1 || $product->product_category_id === 2) {
             $shipping = ShippingCost::where('product_type_id', $product->product_type_id)->first();
             // dd($shipping);
             $shippingCost = $shipping->cost * $request->quantity;
@@ -315,23 +312,23 @@ class CartController extends Controller
 
         // Validation on max quantity
 
-        if($product->min_orderble_quantity <=  $product->quantity ) {
-             $validator = Validator::make($request->all(), [
+        if ($product->min_orderble_quantity <=  $product->quantity) {
+            $validator = Validator::make($request->all(), [
                 'quantity' => "required|numeric|min:{$product->min_orderble_quantity}|max:{$product->quantity}",
             ]);
         } else {
-             $validator = Validator::make($request->all(), [
+            $validator = Validator::make($request->all(), [
                 'quantity' => "required|numeric|min:1|max:{$product->quantity}",
             ]);
         }
-         if ($validator->fails()) {
+        if ($validator->fails()) {
             $message = $validator->errors();
             session()->flash('error_message', $message->first('quantity'));
             return response()->json(['success' => false]);
         }
 
         $id = $product->id;
-        $existingItem = Cart::search(function($cartItem) use ($id) {
+        $existingItem = Cart::search(function ($cartItem) use ($id) {
             return $cartItem->id == $id;
         });
 
@@ -353,35 +350,34 @@ class CartController extends Controller
         $gotTires = false;
         $balansering = Product::find(4);
         $id = $balansering->id;
-        $existBalansering = Cart::search(function($cartItem) use ($id) {
+        $existBalansering = Cart::search(function ($cartItem) use ($id) {
             return $cartItem->id === (string) $id;
         });
 
-        if(sizeof(Cart::content()) > 0) {
-            foreach(Cart::content() as $item) {
+        if (sizeof(Cart::content()) > 0) {
+            foreach (Cart::content() as $item) {
 
-                if($item->options->product_category_id == 2 || $item->options->product_category_id == 1) {
+                if ($item->options->product_category_id == 2 || $item->options->product_category_id == 1) {
                     $qtyArr[] = $item->qty;
                 }
 
                 $inchArr[] = $item->model->product_inch;
 
-                if($item->options->product_category_id == 2)
+                if ($item->options->product_category_id == 2)
                     $gotRims = true;
 
-                if($item->options->product_category_id == 1)
+                if ($item->options->product_category_id == 1)
                     $gotTires = true;
-
             }
-            if($gotRims && $gotTires && sizeof($existBalansering) > 0) {
+            if ($gotRims && $gotTires && sizeof($existBalansering) > 0) {
                 $inch = max($inchArr);
                 $qty = min($qtyArr);
 
-                if(!empty($inch)) {
+                if (!empty($inch)) {
                     $mountPrice = 0;
                     $mountPrice = Profit::where('product_type', 3)
-                            ->where('size', $inch)
-                            ->first()->mount;
+                        ->where('size', $inch)
+                        ->first()->mount;
                     Cart::update($existBalansering->first()->rowId, [
                         'qty' => $qty,
                     ]);
@@ -407,14 +403,14 @@ class CartController extends Controller
         $validator = Validator::make($request->all(), [
             'et' => "required|numeric|min:{$product->et_min}|max:{$product->et}"
         ]);
-         if ($validator->fails()) {
+        if ($validator->fails()) {
             $message = $validator->errors();
             session()->flash('error_message', $message->first('quantity'));
             return response()->json(['success' => false]);
         }
 
         $id = $request->id;
-        $existingItem = Cart::search(function($cartItem) use($id) {
+        $existingItem = Cart::search(function ($cartItem) use ($id) {
             return $cartItem->id == $id;
         });
         // dd($existingItem->first()->options->et);
@@ -446,19 +442,19 @@ class CartController extends Controller
         $cookie = json_decode(Cookie::get('cookie'), true);
 
 
-        if($cartItem->id == 1)
+        if ($cartItem->id == 1)
             unset($cookie['addTPMS']);
-        if($cartItem->id == 2)
+        if ($cartItem->id == 2)
             unset($cookie['addKit']);
         // if($cartItem->id == 4)
         //     unset($cookie['addCarChange']);
-        if($cartItem->id == 3)
+        if ($cartItem->id == 3)
             unset($cookie['addLockKit']);
-        if($cartItem->id == 4)
+        if ($cartItem->id == 4)
             unset($cookie['addMount']);
 
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
 
         Cart::remove($varukorg);
 
@@ -466,42 +462,41 @@ class CartController extends Controller
         $gotTires = false;
         $balansering = Product::find(4);
         $id = $balansering->id;
-        $existBalansering = Cart::search(function($cartItem) use ($id) {
+        $existBalansering = Cart::search(function ($cartItem) use ($id) {
             return $cartItem->id === (string) $id;
         });
 
-        if(sizeof(Cart::content()) > 0) {
-            foreach(Cart::content() as $item) {
+        if (sizeof(Cart::content()) > 0) {
+            foreach (Cart::content() as $item) {
 
-                if($item->options->product_category_id == 2 || $item->options->product_category_id == 1) {
+                if ($item->options->product_category_id == 2 || $item->options->product_category_id == 1) {
                     $qtyArr[] = $item->qty;
                 }
 
                 $inchArr[] = $item->model->product_inch;
 
-                if($item->options->product_category_id == 2)
+                if ($item->options->product_category_id == 2)
                     $gotRims = true;
 
-                if($item->options->product_category_id == 1)
+                if ($item->options->product_category_id == 1)
                     $gotTires = true;
-
             }
-            if($gotRims && $gotTires && sizeof($existBalansering) > 0) {
+            if ($gotRims && $gotTires && sizeof($existBalansering) > 0) {
                 $inch = max($inchArr);
                 $qty = min($qtyArr);
 
-                if(!empty($inch)) {
+                if (!empty($inch)) {
                     $mountPrice = 0;
                     $mountPrice = Profit::where('product_type', 3)
-                            ->where('size', $inch)
-                            ->first()->mount;
+                        ->where('size', $inch)
+                        ->first()->mount;
                     Cart::update($existBalansering->first()->rowId, [
                         'qty' => $qty,
                     ]);
                 }
             }
 
-            if( (!$gotRims || !$gotTires) && sizeof($existBalansering) > 0) {
+            if ((!$gotRims || !$gotTires) && sizeof($existBalansering) > 0) {
                 Cart::remove($existBalansering->first()->rowId);
             }
         }
@@ -522,7 +517,7 @@ class CartController extends Controller
         unset($cookie['addCarChange']);
         unset($cookie['addLockKit']);
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
 
         Cart::destroy();
         // return redirect('varukorg')->withSuccessMessage('Din varukorg har tömts!');
@@ -531,28 +526,32 @@ class CartController extends Controller
 
     public function addMount()
     {
-        if(sizeof(Cart::content()) <= 0) { return redirect('varukorg'); }
+        if (sizeof(Cart::content()) <= 0) {
+            return redirect('varukorg');
+        }
 
         $cookie = json_decode(Cookie::get('cookie'), true);
         $cookie['addMount'] = true;
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
         $inchArr = [];
         $qtyArr = [];
 
-        foreach(Cart::content() as $item) {
+        foreach (Cart::content() as $item) {
             $inchArr[] = $item->model->product_inch;
             $qtyArr[] = $item->qty;
         }
         $inch = max($inchArr);
 
-        if(empty($inch)) { return redirect('varukorg'); }
+        if (empty($inch)) {
+            return redirect('varukorg');
+        }
         // $qty = 1;
         $mountPrice = 0;
         $qty = max($qtyArr);
         $mountPrice = Profit::where('product_type', 3)
-                ->where('size', $inch)
-                ->first()->mount;
+            ->where('size', $inch)
+            ->first()->mount;
 
         // if (\App::environment('production')) {
         //     $montering = Product::find(15833);
@@ -565,7 +564,7 @@ class CartController extends Controller
             $montering->product_name,
             $qty,
             $mountPrice
-        )->associate('App\Product','App\Models');
+        )->associate('App\Product', 'App\Models');
 
         return redirect('varukorg');
     }
@@ -575,7 +574,7 @@ class CartController extends Controller
         $cookie = json_decode(Cookie::get('cookie'), true);
         $cookie['addKit'] = true;
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
 
         // $shipping = ShippingCost::where('product_type_id', 7)->first();
         // $shippingCost = $shipping->cost; //Kolla upp fraktkostander för dessa
@@ -590,7 +589,7 @@ class CartController extends Controller
                 'shipping_cost' => 0,
                 'product_category_id' => $kit->product_category_id
             ]
-        )->associate('App\Product','App\Models');
+        )->associate('App\Product', 'App\Models');
 
         return redirect('varukorg');
     }
@@ -613,7 +612,7 @@ class CartController extends Controller
         $cookie = json_decode(Cookie::get('cookie'), true);
         $cookie['addTPMS'] = true;
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
 
         // $shipping = ShippingCost::where('product_type_id', 7)->first();
         // $shippingCost = $shipping->cost; //Kolla upp fraktkostander för dessa
@@ -628,7 +627,7 @@ class CartController extends Controller
                 'shipping_cost' => 0,
                 'product_category_id' => $tpms->product_category_id
             ]
-        )->associate('App\Product','App\Models');
+        )->associate('App\Product', 'App\Models');
 
         return redirect('varukorg');
     }
@@ -662,12 +661,14 @@ class CartController extends Controller
 
     public function addLockKit()
     {
-        if(sizeof(Cart::content()) <= 0) { return redirect('varukorg'); }
+        if (sizeof(Cart::content()) <= 0) {
+            return redirect('varukorg');
+        }
 
         $cookie = json_decode(Cookie::get('cookie'), true);
         $cookie['addLockKit'] = true;
         $cookie = json_encode($cookie);
-        Cookie::queue('cookie', $cookie, 60*24*7);
+        Cookie::queue('cookie', $cookie, 60 * 24 * 7);
 
         // $shipping = ShippingCost::where('product_type_id', 12)->first();
         // $shippingCost = $shipping->cost; //Kolla upp fraktkostander för dessa
@@ -682,7 +683,7 @@ class CartController extends Controller
                 'shipping_cost' => 0,
                 'product_category_id' => $lockKit->product_category_id
             ]
-        )->associate('App\Product','App\Models');
+        )->associate('App\Product', 'App\Models');
 
         return redirect('varukorg');
     }
@@ -695,17 +696,17 @@ class CartController extends Controller
 
         // dd($request->all());
         $totalPrice = str_replace(' ', '', Cart::total());
-        if( strcasecmp($request->campaignCode, "bf2016") == 0 && $totalPrice >= 5000) {
+        if (strcasecmp($request->campaignCode, "bf2016") == 0 && $totalPrice >= 5000) {
             $request->session()->put('campaign.discount', 800);
             return redirect('varukorg');
         }
 
         $request->session()->forget('campaign');
 
-        if(strcasecmp($request->campaignCode, "bf2016") == 0 && $totalPrice < 5000)
+        if (strcasecmp($request->campaignCode, "bf2016") == 0 && $totalPrice < 5000)
             $response = 'Du måste beställa produkter för minst 5000 kr, för att rabattkoden skall gälla.';
 
-        if(strcasecmp($request->campaignCode, "bf2016") !== 0)
+        if (strcasecmp($request->campaignCode, "bf2016") !== 0)
             $response = 'Ogiltig kampanjkod.';
 
         return back()->withErrors(
@@ -766,7 +767,7 @@ class CartController extends Controller
         $cartCalculator = new CartCalculator;
 
         $pdf = \App::make('dompdf.wrapper');
-        $pdf->loadView('cart/print_cart_order', compact(/*'order', 'carData', 'products',*/ 'cartCalculator'));
+        $pdf->loadView('cart/print_cart_order', compact(/*'order', 'carData', 'products',*/'cartCalculator'));
         return $pdf->stream();
     }
 
